@@ -8,7 +8,7 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
-import ru.recreation.recreationassistant.models.Result;
+import ru.recreation.recreationassistant.models.Event;
 import ru.recreation.recreationassistant.services.SearchEventService;
 import ru.recreation.recreationassistant.models.Exhibition;
 
@@ -17,7 +17,7 @@ import java.util.List;
 @Service
 public class SearchEventServiceImpl implements SearchEventService {
 
-    public List<Result> makingRequest(String location, String category) throws JsonProcessingException {
+    public List<Event> makingRequest(String location, String category) throws JsonProcessingException {
         String url = "https://kudago.com/public-api/v1.4/places/";
 
         HttpHeaders headers = new HttpHeaders();

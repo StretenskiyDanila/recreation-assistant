@@ -6,5 +6,5 @@ import java.util.List;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Exhibition {
     public int count;
-    public List<Result> results;
+    public List<Event> results;
 }
