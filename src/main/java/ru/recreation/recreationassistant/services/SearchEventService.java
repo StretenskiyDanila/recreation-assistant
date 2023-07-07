@@ -1,7 +1,10 @@
 package ru.recreation.recreationassistant.services;
 
-import org.springframework.http.ResponseEntity;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import ru.recreation.recreationassistant.models.Result;
+
+import java.util.List;
 
 public interface SearchEventService {
-    ResponseEntity<String> makingRequest(String location, String category);
+    List<Result> makingRequest(String location, String category) throws JsonProcessingException;
 }

@@ -1,18 +1,39 @@
 package ru.recreation.recreationassistant.services.impl;
 
-import org.springframework.http.ResponseEntity;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
+import ru.recreation.recreationassistant.models.Result;
 import ru.recreation.recreationassistant.services.SearchEventService;
+import ru.recreation.recreationassistant.models.Exhibition;
+
+import java.util.List;
 
 @Service
 public class SearchEventServiceImpl implements SearchEventService {
-    private final String URL = "https://kudago.com/public-api/v1.4/places/";
 
-    public ResponseEntity<String> makingRequest(String location, String category) {
+    public List<Result> makingRequest(String location, String category) throws JsonProcessingException {
+        String url = "https://kudago.com/public-api/v1.4/places/";
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+
+        MultiValueMap<String, String> map= new LinkedMultiValueMap<>();
+        map.add("text_format", "text");
+        map.add("location", location);
+        map.add("categories", category);
+
+        HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(map, headers);
+
         RestTemplate restTemplate = new RestTemplate();
-        String url_request = String.format("%s?text_format=text&location=%s&categories=%s", URL, location, category);
-        return restTemplate.getForEntity(url_request, String.class);
+        ObjectMapper mapper = new ObjectMapper();
+        ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, request, String.class);
+        Exhibition exhibition = mapper.readValue(response.getBody(), Exhibition.class);
+        return exhibition.results;
     }
 }
