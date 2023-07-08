@@ -13,7 +13,7 @@ import ru.recreation.recreationassistant.models.Recommendation;
 public class WeatherHelperServiceImpl
 {
 
-    public ResponseEntity<String> makeRequest(City city)
+    public String makeRequest(City city)
     {
         String URL_API = "https://api.weather.yandex.ru/v2/forecast";
         HttpHeaders headers = new HttpHeaders();
@@ -25,7 +25,7 @@ public class WeatherHelperServiceImpl
         String sb = URL_API + "?lat=" + city.getLatitude() +
                 "?lon=" + city.getLongitude() +
                 "&extra=true";
-        return restTemplate.exchange(sb, HttpMethod.GET, request, String.class);
+        return getRecommendation(getForecast(restTemplate.exchange(sb, HttpMethod.GET, request, String.class)));
     }
 
     public Forecast getForecast(ResponseEntity<String> json)
