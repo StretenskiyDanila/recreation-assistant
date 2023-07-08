@@ -17,7 +17,7 @@ import java.util.List;
 @Service
 public class SearchEventServiceImpl implements SearchEventService {
 
-    public List<Event> makingRequest(String location, String category) throws JsonProcessingException {
+    public List<Event> getRecommendation(String location, String category) throws JsonProcessingException {
         String url = "https://kudago.com/public-api/v1.4/places/";
 
         HttpHeaders headers = new HttpHeaders();

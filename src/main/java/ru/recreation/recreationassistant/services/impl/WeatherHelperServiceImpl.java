@@ -8,9 +8,10 @@ import org.springframework.web.client.RestTemplate;
 import ru.recreation.recreationassistant.models.City;
 import ru.recreation.recreationassistant.models.Forecast;
 import ru.recreation.recreationassistant.models.Recommendation;
+import ru.recreation.recreationassistant.services.WeatherHelperService;
 
 @Service
-public class WeatherHelperServiceImpl
+public class WeatherHelperServiceImpl implements WeatherHelperService
 {
 
     public String getRecommendation(City city)

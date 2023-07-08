@@ -6,5 +6,5 @@ import ru.recreation.recreationassistant.models.Event;
 import java.util.List;
 
 public interface SearchEventService {
-    List<Event> makingRequest(String location, String category) throws JsonProcessingException;
+    List<Event> getRecommendation(String location, String category) throws JsonProcessingException;
 }
