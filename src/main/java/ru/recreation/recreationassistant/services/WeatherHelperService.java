@@ -4,5 +4,5 @@ import ru.recreation.recreationassistant.models.City;
 
 public interface WeatherHelperService
 {
-    String makeRequest(City city);
+    String getRecommendation(City city);
 }

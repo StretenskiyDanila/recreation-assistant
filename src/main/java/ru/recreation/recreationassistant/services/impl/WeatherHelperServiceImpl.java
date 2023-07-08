@@ -13,7 +13,7 @@ import ru.recreation.recreationassistant.models.Recommendation;
 public class WeatherHelperServiceImpl
 {
 
-    public String makeRequest(City city)
+    public String getRecommendation(City city)
     {
         String URL_API = "https://api.weather.yandex.ru/v2/forecast";
         HttpHeaders headers = new HttpHeaders();
@@ -25,10 +25,10 @@ public class WeatherHelperServiceImpl
         String sb = URL_API + "?lat=" + city.getLatitude() +
                 "?lon=" + city.getLongitude() +
                 "&extra=true";
-        return getRecommendation(getForecast(restTemplate.exchange(sb, HttpMethod.GET, request, String.class)));
+        return getStringRecommendation(getForecast(restTemplate.exchange(sb, HttpMethod.GET, request, String.class)));
     }
 
-    public Forecast getForecast(ResponseEntity<String> json)
+    private Forecast getForecast(ResponseEntity<String> json)
     {
         Gson gson = new Gson();
         JsonObject jsonObject = gson.fromJson(json.getBody(), JsonObject.class);
@@ -39,7 +39,7 @@ public class WeatherHelperServiceImpl
         return new Forecast(temp_min, temp_max, feels_like, condition);
     }
 
-    public String getRecommendation(Forecast weather)
+    private String getStringRecommendation(Forecast weather)
     {
         StringBuilder result = new StringBuilder();
         if (weather.feels_like > 17)
