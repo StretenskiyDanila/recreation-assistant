@@ -8,6 +8,7 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import ru.recreation.recreationassistant.configurations.BotConfig;
 import ru.recreation.recreationassistant.entity.User;
 import ru.recreation.recreationassistant.repositories.UserRepository;
+import ru.recreation.recreationassistant.services.RecipeRecommendationsService;
 import ru.recreation.recreationassistant.utils.TelegramChatUtils;
 
 @Component
@@ -17,9 +18,12 @@ public class TelegramBot extends TelegramLongPollingBot {
     private final BotConfig config;
     private final UserRepository userRepository;
 
-    public TelegramBot(BotConfig config, UserRepository userRepository) {
+    private final RecipeRecommendationsService recipeRecommendationsService;
+
+    public TelegramBot(BotConfig config, UserRepository userRepository, RecipeRecommendationsService recipeRecommendationsService) {
         this.config = config;
         this.userRepository = userRepository;
+        this.recipeRecommendationsService = recipeRecommendationsService;
     }
 
     @Override
@@ -32,6 +36,9 @@ public class TelegramBot extends TelegramLongPollingBot {
                 log.info("Added new user with name {} and id {}", userName, telegramChatId);
                 userRepository.save(new User(userName, telegramChatId));
             }
+
+            recipeRecommendationsService.getRecipeRecommendations(userRepository.findByTelegramChatId(telegramChatId).get(), "beer");
+
         } catch (TelegramApiException e) {
             e.printStackTrace();
         }
