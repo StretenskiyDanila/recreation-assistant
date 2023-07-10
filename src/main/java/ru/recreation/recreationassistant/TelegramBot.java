@@ -7,9 +7,12 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import ru.recreation.recreationassistant.configurations.BotConfig;
 import ru.recreation.recreationassistant.entity.User;
+import ru.recreation.recreationassistant.models.Recipe;
 import ru.recreation.recreationassistant.repositories.UserRepository;
 import ru.recreation.recreationassistant.services.RecipeRecommendationsService;
 import ru.recreation.recreationassistant.utils.TelegramChatUtils;
+
+import java.util.List;
 
 @Component
 @Slf4j
@@ -37,8 +40,7 @@ public class TelegramBot extends TelegramLongPollingBot {
                 userRepository.save(new User(userName, telegramChatId));
             }
 
-            recipeRecommendationsService.getRecipeRecommendations(userRepository.findByTelegramChatId(telegramChatId).get(), "beer");
-
+            List<Recipe> recipes = recipeRecommendationsService.getRecipeRecommendations(userRepository.findByTelegramChatId(telegramChatId).get(), "beer");
         } catch (TelegramApiException e) {
             e.printStackTrace();
         }
