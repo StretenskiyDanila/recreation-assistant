@@ -1,5 +1,6 @@
 package ru.recreation.recreationassistant;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.commands.SetMyCommands;
@@ -8,22 +9,33 @@ import org.telegram.telegrambots.meta.api.objects.commands.BotCommand;
 import org.telegram.telegrambots.meta.api.objects.commands.scope.BotCommandScopeDefault;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import ru.recreation.recreationassistant.configurations.BotConfig;
+import ru.recreation.recreationassistant.entity.User;
+import ru.recreation.recreationassistant.models.Recipe;
+import ru.recreation.recreationassistant.repositories.UserRepository;
+import ru.recreation.recreationassistant.services.RecipeRecommendationsService;
+import ru.recreation.recreationassistant.utils.TelegramChatUtils;
 import ru.recreation.recreationassistant.utils.BotButtons;
 import ru.recreation.recreationassistant.utils.TelegramChatUtils;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+
 import java.util.List;
 
 @Component
+@Slf4j
 public class TelegramBot extends TelegramLongPollingBot {
 
     private final BotConfig config;
+    private final UserRepository userRepository;
+    private final RecipeRecommendationsService recipeRecommendationsService;
 
     private final String HELP_MESSAGE = "";
 
-    public TelegramBot(BotConfig config) {
+    public TelegramBot(BotConfig config, UserRepository userRepository, RecipeRecommendationsService recipeRecommendationsService) {
         this.config = config;
+        this.userRepository = userRepository;
+        this.recipeRecommendationsService = recipeRecommendationsService;
         List<BotCommand> listOfCommands = new ArrayList<>();
         listOfCommands.add(new BotCommand("/start", "Приветственное сообщение"));
         listOfCommands.add(new BotCommand("/help", "Справка"));
@@ -37,6 +49,13 @@ public class TelegramBot extends TelegramLongPollingBot {
     @Override
     public void onUpdateReceived(Update update) {
         if (update.hasMessage() && update.getMessage().hasText()) {
+            String telegramChatId = String.valueOf(update.getMessage().getChatId());
+            if (!userRepository.existsByTelegramChatId(telegramChatId)) {
+                String userName = update.getMessage().getFrom().getUserName();
+                log.info("Added new user with name {} and id {}", userName, telegramChatId);
+                userRepository.save(new User(userName, telegramChatId));
+            }
+            List<Recipe> recipes = recipeRecommendationsService.getRecipeRecommendations(userRepository.findByTelegramChatId(telegramChatId).get(), "beer");
             long chatId = update.getMessage().getChatId();
             String message = update.getMessage().getText();
             final String name = update.getMessage().getChat().getUserName();
@@ -45,7 +64,8 @@ public class TelegramBot extends TelegramLongPollingBot {
                     try {
                         TelegramChatUtils.sendMessage(this, chatId, "Привет, " + name + '!');
                         BotButtons.startChoise(chatId, this);
-                    } catch (TelegramApiException | InvocationTargetException | NoSuchMethodException | IllegalAccessException e) {
+                    } catch (TelegramApiException | InvocationTargetException | NoSuchMethodException |
+                             IllegalAccessException e) {
                         e.printStackTrace();
                     }
                     break;
@@ -74,7 +94,8 @@ public class TelegramBot extends TelegramLongPollingBot {
                     try {
                         BotButtons.cityChoise(chatId, this);
                         BotButtons.eventChoise(chatId, this);
-                    } catch (InvocationTargetException | NoSuchMethodException | IllegalAccessException | TelegramApiException e) {
+                    } catch (InvocationTargetException | NoSuchMethodException | IllegalAccessException |
+                             TelegramApiException e) {
                         e.printStackTrace();
                     }
                     break;
