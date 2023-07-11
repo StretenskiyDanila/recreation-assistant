@@ -43,24 +43,22 @@ public class TelegramBot extends TelegramLongPollingBot {
             switch (message) {
                 case "/start":
                     try {
-                        TelegramChatUtils.sendMessage(this, update, "Привет, " + name + '!');
+                        TelegramChatUtils.sendMessage(this, chatId, "Привет, " + name + '!');
                         BotButtons.startChoise(chatId, this);
-                    } catch (TelegramApiException e) {
-                        e.printStackTrace();
-                    } catch (InvocationTargetException | NoSuchMethodException | IllegalAccessException e) {
+                    } catch (TelegramApiException | InvocationTargetException | NoSuchMethodException | IllegalAccessException e) {
                         e.printStackTrace();
                     }
                     break;
                 case "/help":
                     try {
-                        TelegramChatUtils.sendMessage(this, update, HELP_MESSAGE);
+                        TelegramChatUtils.sendMessage(this, chatId, HELP_MESSAGE);
                     } catch (TelegramApiException e) {
                         e.printStackTrace();
                     }
                     break;
                 default:
                     try {
-                        TelegramChatUtils.sendMessage(this, update, "Пожалуйста, введите команду");
+                        TelegramChatUtils.sendMessage(this, chatId, "Пожалуйста, введите команду");
                     } catch (TelegramApiException e) {
                         e.printStackTrace();
                     }
@@ -76,13 +74,12 @@ public class TelegramBot extends TelegramLongPollingBot {
                     try {
                         BotButtons.cityChoise(chatId, this);
                         BotButtons.eventChoise(chatId, this);
-                    } catch (InvocationTargetException | NoSuchMethodException | IllegalAccessException e) {
+                    } catch (InvocationTargetException | NoSuchMethodException | IllegalAccessException | TelegramApiException e) {
                         e.printStackTrace();
                     }
                     break;
                 case "ALL":
                     break;
-
             }
         }
     }

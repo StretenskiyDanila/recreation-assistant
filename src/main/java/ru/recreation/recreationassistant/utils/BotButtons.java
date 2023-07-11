@@ -1,7 +1,6 @@
 package ru.recreation.recreationassistant.utils;
 
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
-import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
@@ -13,15 +12,15 @@ import java.util.List;
 
 public class BotButtons {
 
-    public static void startChoise(long chatId, TelegramLongPollingBot bot) throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
+    public static void startChoise(long chatId, TelegramLongPollingBot bot) throws InvocationTargetException, NoSuchMethodException, IllegalAccessException, TelegramApiException {
         createButtons("Чем Вы планируете заняться?", StartButtons.class, bot, chatId);
     }
 
-    public static void cityChoise(long chatId, TelegramLongPollingBot bot) throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
+    public static void cityChoise(long chatId, TelegramLongPollingBot bot) throws InvocationTargetException, NoSuchMethodException, IllegalAccessException, TelegramApiException {
         createButtons("Выберите город:", CityButtons.class, bot, chatId);
     }
 
-    public static void eventChoise(long chatId, TelegramLongPollingBot bot) throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
+    public static void eventChoise(long chatId, TelegramLongPollingBot bot) throws InvocationTargetException, NoSuchMethodException, IllegalAccessException, TelegramApiException {
         createButtons("Выберите мероприятие:", EventButtons.class, bot, chatId);
     }
 
@@ -30,18 +29,15 @@ public class BotButtons {
         button.setCallbackData(buttonId);
     }
 
-    private static <T extends Enum<T> & ButtonInfo> void createButtons(String textMessage, Class<T> enumClass, TelegramLongPollingBot bot, long chatId) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
-        SendMessage message = new SendMessage();
-        message.setChatId(String.valueOf(chatId));
-        message.setText(textMessage);
+    private static <T extends Enum<T> & ButtonInfo> void createButtons(String textMessage, Class<T> enumClass, TelegramLongPollingBot bot, long chatId) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException, TelegramApiException {
         InlineKeyboardMarkup markupInLine = new InlineKeyboardMarkup();
         List<InlineKeyboardButton> rowInLine = new ArrayList<>();
         List<List<InlineKeyboardButton>> rowsInLine = new ArrayList<>();
         Method valuesMethod = enumClass.getMethod("values");
         T[] enumValues = (T[]) valuesMethod.invoke(null);
-        for (int i = 0; i < enumValues.length; i++) {
+        for (T enumValue : enumValues) {
             var button = new InlineKeyboardButton();
-            addButton(button, enumValues[i].getButtonText(), enumValues[i].getButtonId());
+            addButton(button, enumValue.getButtonText(), enumValue.getButtonId());
             rowInLine.add(button);
             if (rowInLine.size() == 3) {
                 rowsInLine.add(rowInLine);
@@ -52,11 +48,6 @@ public class BotButtons {
             rowsInLine.add(rowInLine);
         }
         markupInLine.setKeyboard(rowsInLine);
-        message.setReplyMarkup(markupInLine);
-        try {
-            bot.execute(message);
-        } catch (TelegramApiException e) {
-            e.printStackTrace();
-        }
+        TelegramChatUtils.sendKeyboardMessage(bot, chatId, textMessage, markupInLine);
     }
 }
