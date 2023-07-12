@@ -6,7 +6,7 @@ public enum EventButtons implements ButtonInfo {
     BUTTON_QUESTS("Квесты", "questroomТ"),
     BUTTON_RESTAURANTS("Рестораны","restaurants"),
     BUTTON_MUSEUMS("Музеи и галереи", "museums"),
-    BUTTON_CONCERTS("Концертные залы", "CONCERTS"),
+    BUTTON_CONCERTS("Концертные залы", "concert-hall"),
     BUTTON_HOUSE_OF_CULTURE("Дома культуры", "culture"),
     BUTTON_MOVIES("Кинотеатры", "cinema"),
     BUTTON_ATTRACTIONS("Достопримечательности", "attractions");
