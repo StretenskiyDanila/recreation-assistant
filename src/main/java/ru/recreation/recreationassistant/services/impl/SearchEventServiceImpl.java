@@ -11,6 +11,7 @@ import org.springframework.web.client.RestTemplate;
 
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
+import ru.recreation.recreationassistant.entity.User;
 import ru.recreation.recreationassistant.models.Event;
 import ru.recreation.recreationassistant.services.SearchEventService;
 import ru.recreation.recreationassistant.models.Exhibition;
@@ -20,7 +21,7 @@ import java.util.List;
 @Service
 public class SearchEventServiceImpl implements SearchEventService {
 
-    public List<Event> getRecommendation(@Nullable String location, @Nullable String category) throws JsonProcessingException {
+    public List<Event> getRecommendation(User user, String category) {
         String url = "https://kudago.com/public-api/v1.4/places/";
 
         HttpHeaders headers = new HttpHeaders();
@@ -28,7 +29,7 @@ public class SearchEventServiceImpl implements SearchEventService {
 
         MultiValueMap<String, String> map= new LinkedMultiValueMap<>();
         map.add("text_format", "text");
-        map.add("location", location);
+        map.add("location", user.getCity());
         map.add("categories", category);
 
         HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(headers);
@@ -39,7 +40,12 @@ public class SearchEventServiceImpl implements SearchEventService {
         RestTemplate restTemplate = new RestTemplate();
         ObjectMapper mapper = new ObjectMapper();
         ResponseEntity<String> response = restTemplate.exchange(components.toUri(), HttpMethod.GET, request, String.class);
-        Exhibition exhibition = mapper.readValue(response.getBody(), Exhibition.class);
+        Exhibition exhibition = null;
+        try {
+            exhibition = mapper.readValue(response.getBody(), Exhibition.class);
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
         return exhibition.results;
     }
 }

@@ -1,10 +1,10 @@
 package ru.recreation.recreationassistant.services;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
+import ru.recreation.recreationassistant.entity.User;
 import ru.recreation.recreationassistant.models.Event;
 
 import java.util.List;
 
 public interface SearchEventService {
-    List<Event> getRecommendation(String location, String category) throws JsonProcessingException;
+    List<Event> getRecommendation(User user, String category);
 }

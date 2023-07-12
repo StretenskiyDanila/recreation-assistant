@@ -48,7 +48,8 @@ public class TelegramBot extends TelegramLongPollingBot {
     private String location;
     private String category;
 
-    public TelegramBot(BotConfig config, UserRepository userRepository, RecipeRecommendationsService recipeRecommendationsService, SearchEventService searchEventService, WeatherHelperService weatherHelperService, RecipientCoordinatesCity recipientCoordinatesCity) {
+    public TelegramBot(BotConfig config, UserRepository userRepository, RecipeRecommendationsService recipeRecommendationsService,
+                       SearchEventService searchEventService, WeatherHelperService weatherHelperService, RecipientCoordinatesCity recipientCoordinatesCity) {
         this.config = config;
         this.userRepository = userRepository;
         this.recipeRecommendationsService = recipeRecommendationsService;
@@ -75,7 +76,6 @@ public class TelegramBot extends TelegramLongPollingBot {
                 log.info("Added new user with name {} and id {}", userName, telegramChatId);
                 userRepository.save(new User(userName, telegramChatId));
             }
-            List<Recipe> recipes = recipeRecommendationsService.getRecipeRecommendations(userRepository.findByTelegramChatId(telegramChatId).get(), "beer");
             long chatId = update.getMessage().getChatId();
             String message = update.getMessage().getText();
             final String name = update.getMessage().getChat().getUserName();
@@ -115,6 +115,7 @@ public class TelegramBot extends TelegramLongPollingBot {
         } else if (update.hasCallbackQuery()) {
             String callbackData = update.getCallbackQuery().getData();
             long chatId = update.getCallbackQuery().getMessage().getChatId();
+            User user = userRepository.findByTelegramChatId(String.valueOf(chatId)).get();
             switch (currentState) {
                 case START_SURVEY:
                     switch (callbackData) {
@@ -151,7 +152,8 @@ public class TelegramBot extends TelegramLongPollingBot {
                 case CITY_CHOISE:
                     try {
                         BotButtons.eventChoise(chatId, this);
-                        location = update.getCallbackQuery().getData();
+                        user.setCity(update.getCallbackQuery().getData());
+                        userRepository.saveAndFlush(user);
                         currentState = StationarySurveyStreet.EVENT_CHOISE;
                     } catch (InvocationTargetException | NoSuchMethodException | IllegalAccessException |
                              TelegramApiException e) {
@@ -162,8 +164,8 @@ public class TelegramBot extends TelegramLongPollingBot {
                     try {
                         category = update.getCallbackQuery().getData();
                         StringBuilder message = new StringBuilder("В вашем городе мы рекомендуем посетить:\n");
-                        List<Event> events = searchEventService.getRecommendation(location, category);
-                        City city = recipientCoordinatesCity.getCoordinates(location);
+                        List<Event> events = searchEventService.getRecommendation(user, category);
+                        City city = recipientCoordinatesCity.getCoordinates(user);
                         String recommendationClothes = weatherHelperService.getRecommendation(city);
                         int i = 1;
                         for (Event event : events) {
