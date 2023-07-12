@@ -1,15 +1,15 @@
 package ru.recreation.recreationassistant.utils;
 
 public enum EventButtons implements ButtonInfo {
-    BUTTON_CLUB("Клубы","clubs"),
-    BUTTON_PARK("Парки","park"),
-    BUTTON_QUESTS("Квесты", "questroomТ"),
-    BUTTON_RESTAURANTS("Рестораны","restaurants"),
-    BUTTON_MUSEUMS("Музеи и галереи", "museums"),
-    BUTTON_CONCERTS("Концертные залы", "concert-hall"),
-    BUTTON_HOUSE_OF_CULTURE("Дома культуры", "culture"),
-    BUTTON_MOVIES("Кинотеатры", "cinema"),
-    BUTTON_ATTRACTIONS("Достопримечательности", "attractions");
+    BUTTON_CLUB("Клубы","CLUB"),
+    BUTTON_PARK("Парки","PARK"),
+    BUTTON_QUESTS("Квесты", "QUESTS"),
+    BUTTON_RESTAURANTS("Рестораны","RESTAURANTS"),
+    BUTTON_MUSEUMS("Музеи и галереи", "MUSEUMS"),
+    BUTTON_CONCERTS("Концертные залы", "CONCERTS"),
+    BUTTON_HOUSE_OF_CULTURE("Дома культуры", "HOUSE_OF_CULTURE"),
+    BUTTON_MOVIES("Кинотеатры", "MOVIES"),
+    BUTTON_ATTRACTIONS("Достопремичательности", "ATTRACTIONS");
 
     EventButtons(String text, String id) {
         buttonText = text;

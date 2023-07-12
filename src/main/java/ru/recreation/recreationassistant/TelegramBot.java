@@ -16,7 +16,6 @@ import ru.recreation.recreationassistant.services.RecipeRecommendationsService;
 import ru.recreation.recreationassistant.utils.TelegramChatUtils;
 import ru.recreation.recreationassistant.utils.BotButtons;
 import ru.recreation.recreationassistant.utils.TelegramChatUtils;
-import ru.recreation.recreationassistant.utils.StationarySurveyStreet;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
@@ -33,15 +32,12 @@ public class TelegramBot extends TelegramLongPollingBot {
 
     private final String HELP_MESSAGE = "";
 
-    private StationarySurveyStreet currentState;
-
     public TelegramBot(BotConfig config, UserRepository userRepository, RecipeRecommendationsService recipeRecommendationsService) {
         this.config = config;
         this.userRepository = userRepository;
         this.recipeRecommendationsService = recipeRecommendationsService;
         List<BotCommand> listOfCommands = new ArrayList<>();
         listOfCommands.add(new BotCommand("/start", "Приветственное сообщение"));
-        listOfCommands.add(new BotCommand("/menu", "Начало работы"));
         listOfCommands.add(new BotCommand("/help", "Справка"));
         try {
             this.execute(new SetMyCommands(listOfCommands, new BotCommandScopeDefault(), null));
@@ -67,18 +63,12 @@ public class TelegramBot extends TelegramLongPollingBot {
                 case "/start":
                     try {
                         TelegramChatUtils.sendMessage(this, chatId, "Привет, " + name + '!');
-                    } catch (TelegramApiException e) {
-                        e.printStackTrace();
-                    }
-                    break;
-                case "/menu":
-                    try {
-                        currentState = StationarySurveyStreet.START_SURVEY;
                         BotButtons.startChoise(chatId, this);
                     } catch (TelegramApiException | InvocationTargetException | NoSuchMethodException |
                              IllegalAccessException e) {
                         e.printStackTrace();
                     }
+                    break;
                 case "/help":
                     try {
                         TelegramChatUtils.sendMessage(this, chatId, HELP_MESSAGE);
@@ -97,39 +87,19 @@ public class TelegramBot extends TelegramLongPollingBot {
         } else if (update.hasCallbackQuery()) {
             String callbackData = update.getCallbackQuery().getData();
             long chatId = update.getCallbackQuery().getMessage().getChatId();
-            switch (currentState) {
-                case START_SURVEY:
-                    switch (callbackData) {
-                        case "HOME":
-                            break;
-                        case "STREET":
-                            try {
-                                BotButtons.cityChoise(chatId, this);
-                                currentState = StationarySurveyStreet.CITY_CHOISE;
-                            } catch (InvocationTargetException | NoSuchMethodException | IllegalAccessException |
-                                     TelegramApiException e) {
-                                e.printStackTrace();
-                            }
-                            break;
-                        case "ALL":
-                            break;
-                    }
+            switch (callbackData) {
+                case "HOME":
                     break;
-                case CITY_CHOISE:
+                case "STREET":
                     try {
+                        BotButtons.cityChoise(chatId, this);
                         BotButtons.eventChoise(chatId, this);
-                        currentState = StationarySurveyStreet.EVENT_CHOISE;
                     } catch (InvocationTargetException | NoSuchMethodException | IllegalAccessException |
                              TelegramApiException e) {
                         e.printStackTrace();
                     }
                     break;
-                case EVENT_CHOISE:
-                    try {
-                        TelegramChatUtils.sendMessage(this, chatId, "Опрос завершён, результаты...\n Введите команду /menu для начало работы");
-                    } catch (TelegramApiException e) {
-                        e.printStackTrace();
-                    }
+                case "ALL":
                     break;
             }
         }
