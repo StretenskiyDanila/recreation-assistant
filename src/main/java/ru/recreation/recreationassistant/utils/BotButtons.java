@@ -24,6 +24,22 @@ public class BotButtons {
         createButtons("Выберите мероприятие:", EventButtons.class, bot, chatId);
     }
 
+    public static void countryChoise(long chatId, TelegramLongPollingBot bot) throws InvocationTargetException, NoSuchMethodException, IllegalAccessException, TelegramApiException {
+        createButtons("Выберите страну кухни:", CountryKitchenButtons.class, bot, chatId);
+    }
+
+    public static void dishesChoise(long chatId, TelegramLongPollingBot bot) throws InvocationTargetException, NoSuchMethodException, IllegalAccessException, TelegramApiException {
+        createButtons("Выберите тип посуды:", TypeOfDishesButtons.class, bot, chatId);
+    }
+
+    public static void healthChoise(long chatId, TelegramLongPollingBot bot) throws InvocationTargetException, NoSuchMethodException, IllegalAccessException, TelegramApiException {
+        createButtons("Выберите тип пищи:", TypeOfHealthButtons.class, bot, chatId);
+    }
+
+    public static void mealsChoise(long chatId, TelegramLongPollingBot bot) throws InvocationTargetException, NoSuchMethodException, IllegalAccessException, TelegramApiException {
+        createButtons("Выберите приём пищи:", TypeOfMealButtons.class, bot, chatId);
+    }
+
     private static void addButton(InlineKeyboardButton button, String buttonText, final String buttonId) {
         button.setText(buttonText);
         button.setCallbackData(buttonId);

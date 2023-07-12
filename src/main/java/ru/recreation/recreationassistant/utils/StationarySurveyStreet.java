@@ -7,5 +7,9 @@ public enum StationarySurveyStreet {
     ALL,
     CITY_CHOISE,
     EVENT_CHOISE,
-    END_CHOISE;
+    END_CHOISE,
+    HEALTH_CHOISE,
+    DISHES_CHOISE,
+    MEAL_CHOISE,
+    COUNTRY_CHOISE;
 }
