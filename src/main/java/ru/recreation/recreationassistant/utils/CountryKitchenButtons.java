@@ -1,12 +1,12 @@
 package ru.recreation.recreationassistant.utils;
 
 public enum CountryKitchenButtons implements ButtonInfo {
-    BUTTON_USA("Американская", "USA"),
-    BUTTON_CHN("Китайская", "CHINA"),
-    BUTTON_FRZ("Французская", "France"),
-    BUTTON_ITA("Итальянская", "Italy"),
-    BUTTON_ASIA("Азиатская", "ASIA"),
-    BUTTON_WORLD("Мировая", "WORLD");
+    BUTTON_USA("Американская", "american"),
+    BUTTON_CHN("Китайская", "chinese"),
+    BUTTON_FRZ("Французская", "french"),
+    BUTTON_ITA("Итальянская", "italian"),
+    BUTTON_ASIA("Азиатская", "asian"),
+    BUTTON_WORLD("Мировая", "world");
 
     CountryKitchenButtons(String text, String id) {
         buttonText = text;
@@ -18,11 +18,11 @@ public enum CountryKitchenButtons implements ButtonInfo {
 
     @Override
     public String getButtonText() {
-        return null;
+        return buttonText;
     }
 
     @Override
     public String getButtonId() {
-        return null;
+        return buttonId;
     }
 }

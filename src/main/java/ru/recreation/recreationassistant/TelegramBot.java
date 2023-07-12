@@ -31,7 +31,7 @@ public class TelegramBot extends TelegramLongPollingBot {
     private final UserRepository userRepository;
     private final RecipeRecommendationsService recipeRecommendationsService;
 
-    private final String HELP_MESSAGE = "";
+    private final String HELP_MESSAGE = "help";
 
     private StationarySurveyStreet currentState;
 
@@ -66,7 +66,8 @@ public class TelegramBot extends TelegramLongPollingBot {
             switch (message) {
                 case "/start":
                     try {
-                        TelegramChatUtils.sendMessage(this, chatId, "Привет, " + name + '!');
+                        TelegramChatUtils.sendMessage(this, chatId, "Привет, " + name + "!\n" +
+                                "Для началы работы введите команду /menu");
                     } catch (TelegramApiException e) {
                         e.printStackTrace();
                     }
@@ -79,6 +80,7 @@ public class TelegramBot extends TelegramLongPollingBot {
                              IllegalAccessException e) {
                         e.printStackTrace();
                     }
+                    break;
                 case "/help":
                     try {
                         TelegramChatUtils.sendMessage(this, chatId, HELP_MESSAGE);
@@ -101,6 +103,13 @@ public class TelegramBot extends TelegramLongPollingBot {
                 case START_SURVEY:
                     switch (callbackData) {
                         case "HOME":
+                            try {
+                            BotButtons.healthChoise(chatId, this);
+                            currentState = StationarySurveyStreet.HEALTH_CHOISE;
+                            } catch(InvocationTargetException | NoSuchMethodException | IllegalAccessException |
+                                    TelegramApiException e) {
+                                e.printStackTrace();
+                            }
                             break;
                         case "STREET":
                             try {
@@ -124,10 +133,38 @@ public class TelegramBot extends TelegramLongPollingBot {
                         e.printStackTrace();
                     }
                     break;
-                case EVENT_CHOISE:
+                case EVENT_CHOISE, COUNTRY_CHOISE:
                     try {
-                        TelegramChatUtils.sendMessage(this, chatId, "Опрос завершён, результаты...\n Введите команду /menu для начало работы");
+                        TelegramChatUtils.sendMessage(this, chatId, "Опрос завершён, результаты...\nВведите команду /menu для нового прохождения опроса");
+                        currentState = StationarySurveyStreet.START_SURVEY;
                     } catch (TelegramApiException e) {
+                        e.printStackTrace();
+                    }
+                    break;
+                case HEALTH_CHOISE:
+                    try {
+                        BotButtons.mealsChoise(chatId, this);
+                        currentState = StationarySurveyStreet.MEAL_CHOISE;
+                    } catch(InvocationTargetException | NoSuchMethodException | IllegalAccessException |
+                            TelegramApiException e) {
+                        e.printStackTrace();
+                    }
+                    break;
+                case MEAL_CHOISE:
+                    try {
+                        BotButtons.dishesChoise(chatId, this);
+                        currentState = StationarySurveyStreet.DISHES_CHOISE;
+                    } catch(InvocationTargetException | NoSuchMethodException | IllegalAccessException |
+                            TelegramApiException e) {
+                        e.printStackTrace();
+                    }
+                    break;
+                case DISHES_CHOISE:
+                    try {
+                        BotButtons.countryChoise(chatId, this);
+                        currentState = StationarySurveyStreet.COUNTRY_CHOISE;
+                    } catch(InvocationTargetException | NoSuchMethodException | IllegalAccessException |
+                            TelegramApiException e) {
                         e.printStackTrace();
                     }
                     break;
