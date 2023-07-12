@@ -1,5 +1,6 @@
 package ru.recreation.recreationassistant;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
@@ -10,12 +11,17 @@ import org.telegram.telegrambots.meta.api.objects.commands.scope.BotCommandScope
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import ru.recreation.recreationassistant.configurations.BotConfig;
 import ru.recreation.recreationassistant.entity.User;
+import ru.recreation.recreationassistant.models.City;
+import ru.recreation.recreationassistant.models.Event;
 import ru.recreation.recreationassistant.models.Recipe;
 import ru.recreation.recreationassistant.repositories.UserRepository;
 import ru.recreation.recreationassistant.services.RecipeRecommendationsService;
+import ru.recreation.recreationassistant.services.RecipientCoordinatesCity;
+import ru.recreation.recreationassistant.services.SearchEventService;
+import ru.recreation.recreationassistant.services.WeatherHelperService;
+import ru.recreation.recreationassistant.utils.CityButtons;
 import ru.recreation.recreationassistant.utils.TelegramChatUtils;
 import ru.recreation.recreationassistant.utils.BotButtons;
-import ru.recreation.recreationassistant.utils.TelegramChatUtils;
 import ru.recreation.recreationassistant.utils.StationarySurveyStreet;
 
 import java.lang.reflect.InvocationTargetException;
@@ -30,16 +36,25 @@ public class TelegramBot extends TelegramLongPollingBot {
     private final BotConfig config;
     private final UserRepository userRepository;
     private final RecipeRecommendationsService recipeRecommendationsService;
+    private final SearchEventService searchEventService;
+    private final WeatherHelperService weatherHelperService;
+    private final RecipientCoordinatesCity recipientCoordinatesCity;
 
     private final String HELP_MESSAGE = "help";
 
     private StationarySurveyStreet currentState;
     private String startChoise = "start";
 
-    public TelegramBot(BotConfig config, UserRepository userRepository, RecipeRecommendationsService recipeRecommendationsService) {
+    private String location;
+    private String category;
+
+    public TelegramBot(BotConfig config, UserRepository userRepository, RecipeRecommendationsService recipeRecommendationsService, SearchEventService searchEventService, WeatherHelperService weatherHelperService, RecipientCoordinatesCity recipientCoordinatesCity) {
         this.config = config;
         this.userRepository = userRepository;
         this.recipeRecommendationsService = recipeRecommendationsService;
+        this.searchEventService = searchEventService;
+        this.weatherHelperService = weatherHelperService;
+        this.recipientCoordinatesCity = recipientCoordinatesCity;
         List<BotCommand> listOfCommands = new ArrayList<>();
         listOfCommands.add(new BotCommand("/start", "Приветственное сообщение"));
         listOfCommands.add(new BotCommand("/menu", "Начало работы"));
@@ -136,6 +151,7 @@ public class TelegramBot extends TelegramLongPollingBot {
                 case CITY_CHOISE:
                     try {
                         BotButtons.eventChoise(chatId, this);
+                        location = update.getCallbackQuery().getData();
                         currentState = StationarySurveyStreet.EVENT_CHOISE;
                     } catch (InvocationTargetException | NoSuchMethodException | IllegalAccessException |
                              TelegramApiException e) {
@@ -144,12 +160,26 @@ public class TelegramBot extends TelegramLongPollingBot {
                     break;
                 case EVENT_CHOISE:
                     try {
-                        TelegramChatUtils.sendMessage(this, chatId, "Опрос завершён, результаты...\nВведите команду /menu для нового прохождения опроса");
-                        currentState = StationarySurveyStreet.START_SURVEY;
-                    } catch (TelegramApiException e) {
+                        category = update.getCallbackQuery().getData();
+                        StringBuilder message = new StringBuilder("В вашем городе мы рекомендуем посетить:\n");
+                        List<Event> events = searchEventService.getRecommendation(location, category);
+                        City city = recipientCoordinatesCity.getCoordinates(location);
+                        String recommendationClothes = weatherHelperService.getRecommendation(city);
+                        int i = 1;
+                        for (Event event : events) {
+                            message.append(i++).append(". Название: ").append(event.title).append("\n");
+                            message.append("   Находится по адресу: ").append(event.address).append("\n");
+                            message.append("   Подробно можно узнать на сайте: ").append(event.site_url).append("\n");
+                            message.append("   Либо по номеру телефона: ").append(event.phone).append("\n\n");
+                            TelegramChatUtils.sendMessage(this, chatId, message.toString());
+                            message = new StringBuilder();
+                        }
+                        TelegramChatUtils.sendMessage(this, chatId, recommendationClothes);
+                    } catch (TelegramApiException | JsonProcessingException e) {
                         e.printStackTrace();
                     }
                     break;
+
                 case HEALTH_CHOISE:
                     try {
                         BotButtons.mealsChoise(chatId, this);
