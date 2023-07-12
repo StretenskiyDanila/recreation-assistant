@@ -1,9 +1,9 @@
 package ru.recreation.recreationassistant.utils;
 
 public enum TypeOfDishesButtons implements ButtonInfo {
-    BUTTON_COCKTAIL("Коктейль", "alcohol cocktail"),
+    BUTTON_COCKTAIL("Напитки", "drinks"),
     BUTTON_DESSERTS("Десерт", "desserts"),
-    BUTTON_DRINKS("Напиток", "drinks"),
+    BUTTON_DRINKS("Основное блюдо", "main course"),
     BUTTON_SALAD("Салат", "salad"),
     BUTTON_SOUP("Суп", "soup"),
     BUTTON_SWEETS("Сладость", "sweets");

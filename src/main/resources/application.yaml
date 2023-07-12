@@ -8,6 +8,8 @@ spring:
     url: jdbc:h2:file:/data/recreationAssistant
     username: test
     password: test
-    driverClassName: org.h2.Driver
-  jpa:
-    spring.jpa.database-platform: org.hibernate.dialect.H2Dialect
+    driver-class-name: org.h2.Driver
+    jpa:
+      spring.jpa.database-platform: org.hibernate.dialect.H2Dialect
+    hikari:
+      connection-test-query: SELECT 1

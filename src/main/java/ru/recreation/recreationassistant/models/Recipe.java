@@ -16,4 +16,6 @@ public class Recipe {
     public List<String> mealType;
     public List<String> dishType;
 
+    public String url;
+
 }

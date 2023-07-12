@@ -5,4 +5,4 @@ create TABLE w_users
     telegram_chat_id         char(255)        NOT NULL,
     city                     varchar(32)
 
-)
+);
