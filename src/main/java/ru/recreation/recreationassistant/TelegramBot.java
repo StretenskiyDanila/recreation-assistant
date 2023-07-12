@@ -34,6 +34,7 @@ public class TelegramBot extends TelegramLongPollingBot {
     private final String HELP_MESSAGE = "help";
 
     private StationarySurveyStreet currentState;
+    private String startChoise = "start";
 
     public TelegramBot(BotConfig config, UserRepository userRepository, RecipeRecommendationsService recipeRecommendationsService) {
         this.config = config;
@@ -104,10 +105,10 @@ public class TelegramBot extends TelegramLongPollingBot {
                     switch (callbackData) {
                         case "HOME":
                             try {
-                            BotButtons.healthChoise(chatId, this);
-                            currentState = StationarySurveyStreet.HEALTH_CHOISE;
-                            } catch(InvocationTargetException | NoSuchMethodException | IllegalAccessException |
-                                    TelegramApiException e) {
+                                BotButtons.healthChoise(chatId, this);
+                                currentState = StationarySurveyStreet.HEALTH_CHOISE;
+                            } catch (InvocationTargetException | NoSuchMethodException | IllegalAccessException |
+                                     TelegramApiException e) {
                                 e.printStackTrace();
                             }
                             break;
@@ -121,6 +122,14 @@ public class TelegramBot extends TelegramLongPollingBot {
                             }
                             break;
                         case "ALL":
+                            startChoise = "ALL";
+                            try {
+                                BotButtons.healthChoise(chatId, this);
+                                currentState = StationarySurveyStreet.HEALTH_CHOISE;
+                            } catch (InvocationTargetException | NoSuchMethodException | IllegalAccessException |
+                                     TelegramApiException e) {
+                                e.printStackTrace();
+                            }
                             break;
                     }
                     break;
@@ -133,7 +142,7 @@ public class TelegramBot extends TelegramLongPollingBot {
                         e.printStackTrace();
                     }
                     break;
-                case EVENT_CHOISE, COUNTRY_CHOISE:
+                case EVENT_CHOISE:
                     try {
                         TelegramChatUtils.sendMessage(this, chatId, "Опрос завершён, результаты...\nВведите команду /menu для нового прохождения опроса");
                         currentState = StationarySurveyStreet.START_SURVEY;
@@ -145,8 +154,8 @@ public class TelegramBot extends TelegramLongPollingBot {
                     try {
                         BotButtons.mealsChoise(chatId, this);
                         currentState = StationarySurveyStreet.MEAL_CHOISE;
-                    } catch(InvocationTargetException | NoSuchMethodException | IllegalAccessException |
-                            TelegramApiException e) {
+                    } catch (InvocationTargetException | NoSuchMethodException | IllegalAccessException |
+                             TelegramApiException e) {
                         e.printStackTrace();
                     }
                     break;
@@ -154,8 +163,8 @@ public class TelegramBot extends TelegramLongPollingBot {
                     try {
                         BotButtons.dishesChoise(chatId, this);
                         currentState = StationarySurveyStreet.DISHES_CHOISE;
-                    } catch(InvocationTargetException | NoSuchMethodException | IllegalAccessException |
-                            TelegramApiException e) {
+                    } catch (InvocationTargetException | NoSuchMethodException | IllegalAccessException |
+                             TelegramApiException e) {
                         e.printStackTrace();
                     }
                     break;
@@ -163,8 +172,21 @@ public class TelegramBot extends TelegramLongPollingBot {
                     try {
                         BotButtons.countryChoise(chatId, this);
                         currentState = StationarySurveyStreet.COUNTRY_CHOISE;
-                    } catch(InvocationTargetException | NoSuchMethodException | IllegalAccessException |
-                            TelegramApiException e) {
+                    } catch (InvocationTargetException | NoSuchMethodException | IllegalAccessException |
+                             TelegramApiException e) {
+                        e.printStackTrace();
+                    }
+                    break;
+                case COUNTRY_CHOISE:
+                    try {
+                        if (!startChoise.equals("ALL")) {
+                            TelegramChatUtils.sendMessage(this, chatId, "Опрос завершён, результаты...\nВведите команду /menu для нового прохождения опроса");
+                            currentState = StationarySurveyStreet.START_SURVEY;
+                        } else {
+                            BotButtons.cityChoise(chatId, this);
+                            currentState = StationarySurveyStreet.CITY_CHOISE;
+                        }
+                    } catch (InvocationTargetException | NoSuchMethodException | IllegalAccessException | TelegramApiException e) {
                         e.printStackTrace();
                     }
                     break;
