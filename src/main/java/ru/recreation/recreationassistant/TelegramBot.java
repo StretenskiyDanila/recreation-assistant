@@ -16,6 +16,7 @@ import ru.recreation.recreationassistant.services.RecipeRecommendationsService;
 import ru.recreation.recreationassistant.utils.TelegramChatUtils;
 import ru.recreation.recreationassistant.utils.BotButtons;
 import ru.recreation.recreationassistant.utils.TelegramChatUtils;
+import ru.recreation.recreationassistant.utils.StationarySurveyStreet;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
@@ -31,6 +32,8 @@ public class TelegramBot extends TelegramLongPollingBot {
     private final RecipeRecommendationsService recipeRecommendationsService;
 
     private final String HELP_MESSAGE = "";
+
+    private StationarySurveyStreet currentState;
 
     public TelegramBot(BotConfig config, UserRepository userRepository, RecipeRecommendationsService recipeRecommendationsService) {
         this.config = config;
@@ -63,6 +66,7 @@ public class TelegramBot extends TelegramLongPollingBot {
                 case "/start":
                     try {
                         TelegramChatUtils.sendMessage(this, chatId, "Привет, " + name + '!');
+                        currentState = StationarySurveyStreet.START_SURVEY;
                         BotButtons.startChoise(chatId, this);
                     } catch (TelegramApiException | InvocationTargetException | NoSuchMethodException |
                              IllegalAccessException e) {
@@ -87,20 +91,32 @@ public class TelegramBot extends TelegramLongPollingBot {
         } else if (update.hasCallbackQuery()) {
             String callbackData = update.getCallbackQuery().getData();
             long chatId = update.getCallbackQuery().getMessage().getChatId();
-            switch (callbackData) {
-                case "HOME":
+            switch (currentState) {
+                case START_SURVEY:
+                    switch (callbackData) {
+                        case "HOME":
+                            break;
+                        case "STREET":
+                            try {
+                                BotButtons.cityChoise(chatId, this);
+                                currentState = StationarySurveyStreet.CITY_CHOISE;
+                            } catch (InvocationTargetException | NoSuchMethodException | IllegalAccessException |
+                                     TelegramApiException e) {
+                                e.printStackTrace();
+                            }
+                            break;
+                        case "ALL":
+                            break;
+                    }
                     break;
-                case "STREET":
+                case CITY_CHOISE:
                     try {
-                        BotButtons.cityChoise(chatId, this);
                         BotButtons.eventChoise(chatId, this);
+                        currentState = StationarySurveyStreet.EVENT_CHOISE;
                     } catch (InvocationTargetException | NoSuchMethodException | IllegalAccessException |
                              TelegramApiException e) {
                         e.printStackTrace();
                     }
-                    break;
-                case "ALL":
-                    break;
             }
         }
     }
