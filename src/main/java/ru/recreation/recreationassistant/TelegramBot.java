@@ -41,6 +41,7 @@ public class TelegramBot extends TelegramLongPollingBot {
         this.recipeRecommendationsService = recipeRecommendationsService;
         List<BotCommand> listOfCommands = new ArrayList<>();
         listOfCommands.add(new BotCommand("/start", "Приветственное сообщение"));
+        listOfCommands.add(new BotCommand("/menu", "Начало работы"));
         listOfCommands.add(new BotCommand("/help", "Справка"));
         try {
             this.execute(new SetMyCommands(listOfCommands, new BotCommandScopeDefault(), null));
@@ -66,13 +67,18 @@ public class TelegramBot extends TelegramLongPollingBot {
                 case "/start":
                     try {
                         TelegramChatUtils.sendMessage(this, chatId, "Привет, " + name + '!');
+                    } catch (TelegramApiException e) {
+                        e.printStackTrace();
+                    }
+                    break;
+                case "/menu":
+                    try {
                         currentState = StationarySurveyStreet.START_SURVEY;
                         BotButtons.startChoise(chatId, this);
                     } catch (TelegramApiException | InvocationTargetException | NoSuchMethodException |
                              IllegalAccessException e) {
                         e.printStackTrace();
                     }
-                    break;
                 case "/help":
                     try {
                         TelegramChatUtils.sendMessage(this, chatId, HELP_MESSAGE);
@@ -117,6 +123,14 @@ public class TelegramBot extends TelegramLongPollingBot {
                              TelegramApiException e) {
                         e.printStackTrace();
                     }
+                    break;
+                case EVENT_CHOISE:
+                    try {
+                        TelegramChatUtils.sendMessage(this, chatId, "Опрос завершён, результаты...\n Введите команду /menu для начало работы");
+                    } catch (TelegramApiException e) {
+                        e.printStackTrace();
+                    }
+                    break;
             }
         }
     }
