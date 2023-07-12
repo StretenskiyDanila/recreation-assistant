@@ -1,7 +1,11 @@
 package ru.recreation.recreationassistant.models;
 
+import lombok.AllArgsConstructor;
+
+@AllArgsConstructor
 public class City
 {
+
     public double getLongitude()
     {
         return longitude;
