@@ -17,6 +17,7 @@ import ru.recreation.recreationassistant.models.Recipe;
 import ru.recreation.recreationassistant.repositories.*;
 import ru.recreation.recreationassistant.services.*;
 import ru.recreation.recreationassistant.utils.BotButtons;
+import ru.recreation.recreationassistant.utils.CityButtons;
 import ru.recreation.recreationassistant.utils.StationarySurveyStreet;
 import ru.recreation.recreationassistant.utils.TelegramChatUtils;
 
@@ -178,7 +179,8 @@ public class TelegramBot extends TelegramLongPollingBot {
                         category = data;
                         StringBuilder message = new StringBuilder("В вашем городе мы рекомендуем посетить:\n");
                         List<Event> events = searchEventService.getRecommendation(user, category);
-                        City city = recipientCoordinatesCity.getCoordinates(user);
+                        String location = CityButtons.getNameCityOnId(user.getCity());
+                        City city = recipientCoordinatesCity.getCoordinates(location);
                         String recommendationClothes = weatherHelperService.getRecommendation(city);
                         int i = 1;
                         for (Event event : events) {
