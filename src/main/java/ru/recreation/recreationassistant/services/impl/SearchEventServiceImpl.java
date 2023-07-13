@@ -2,6 +2,7 @@ package ru.recreation.recreationassistant.services.impl;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
@@ -18,33 +19,38 @@ import ru.recreation.recreationassistant.models.Exhibition;
 import java.util.List;
 
 @Service
+@Slf4j
 public class SearchEventServiceImpl implements SearchEventService {
 
     public List<Event> getRecommendation(User user, String category) {
-        String url = "https://kudago.com/public-api/v1.4/places/";
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-
-        MultiValueMap<String, String> map= new LinkedMultiValueMap<>();
-        map.add("text_format", "text");
-        map.add("location", user.getCity());
-        map.add("categories", category);
-
-        HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(headers);
-
-        UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(url).queryParams(map);
-        UriComponents components = builder.build().encode();
-
-        RestTemplate restTemplate = new RestTemplate();
-        ObjectMapper mapper = new ObjectMapper();
-        ResponseEntity<String> response = restTemplate.exchange(components.toUri(), HttpMethod.GET, request, String.class);
-        Exhibition exhibition = null;
         try {
+            log.info("SearchEventService getRecommendation method start");
+            String url = "https://kudago.com/public-api/v1.4/places/";
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+
+            MultiValueMap<String, String> map = new LinkedMultiValueMap<>();
+            log.info("Parsing user and category params ...");
+            map.add("text_format", "text");
+            map.add("location", user.getCity());
+            map.add("categories", category);
+
+            HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(headers);
+
+            UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(url).queryParams(map);
+            UriComponents components = builder.build().encode();
+
+            RestTemplate restTemplate = new RestTemplate();
+            ObjectMapper mapper = new ObjectMapper();
+            log.info("Making request ...");
+            ResponseEntity<String> response = restTemplate.exchange(components.toUri(), HttpMethod.GET, request, String.class);
+            Exhibition exhibition;
+            log.info("Creating exhibition from respone body");
             exhibition = mapper.readValue(response.getBody(), Exhibition.class);
+            return exhibition.results;
         } catch (JsonProcessingException e) {
-            e.printStackTrace();
+            throw new RuntimeException();
         }
-        return exhibition.results;
     }
 }
