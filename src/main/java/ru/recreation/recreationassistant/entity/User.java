@@ -31,6 +31,9 @@ public class User {
     @Column(name = "city")
     private String city;
 
+    @Column(name = "current_state")
+    private String currentState;
+
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "w_users_healths",
             joinColumns = {@JoinColumn(name = "user_id")},
