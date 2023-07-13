@@ -178,6 +178,7 @@ public class TelegramBot extends TelegramLongPollingBot {
                             message = new StringBuilder();
                         }
                         TelegramChatUtils.sendMessage(this, chatId, recommendationClothes);
+                        TelegramChatUtils.sendMessage(this, chatId, "Опрос завершён, результаты...\nВведите команду /menu для нового прохождения опроса");
                     } catch (TelegramApiException | JsonProcessingException e) {
                         e.printStackTrace();
                     }
