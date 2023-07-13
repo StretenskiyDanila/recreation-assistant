@@ -2,8 +2,7 @@ package ru.recreation.recreationassistant.utils;
 
 public enum StartButtons implements ButtonInfo {
     BUTTON_HOME("Сидеть дома", "HOME"),
-    BUTTON_STREET("Идти гулять", "STREET"),
-    BUTTON_ALL("Всё вместе", "ALL");
+    BUTTON_STREET("Идти гулять", "STREET");
 
     StartButtons(String text, String id) {
         buttonText = text;
