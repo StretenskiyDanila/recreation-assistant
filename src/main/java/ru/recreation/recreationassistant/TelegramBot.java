@@ -92,15 +92,15 @@ public class TelegramBot extends TelegramLongPollingBot {
             }
             String message = update.getMessage().getText();
             switch (message) {
-                case "/start":
+                case "/start" -> {
                     try {
                         TelegramChatUtils.sendMessage(this, chatId, "Привет, " + userName + "!\n" +
                                 "Для началы работы введите команду /menu");
                     } catch (TelegramApiException e) {
                         e.printStackTrace();
                     }
-                    break;
-                case "/menu":
+                }
+                case "/menu" -> {
                     try {
                         userService.setCurrentState(user, StationarySurveyStreet.START_SURVEY);
                         BotButtons.startChoise(chatId, this);
@@ -108,15 +108,15 @@ public class TelegramBot extends TelegramLongPollingBot {
                              IllegalAccessException e) {
                         e.printStackTrace();
                     }
-                    break;
-                case "/help":
+                }
+                case "/help" -> {
                     try {
                         TelegramChatUtils.sendMessage(this, chatId, HELP_MESSAGE);
                     } catch (TelegramApiException e) {
                         e.printStackTrace();
                     }
-                    break;
-                default:
+                }
+                default -> {
                     try {
                         if (userService.getUser(chatId).getCurrentState().equals(StationarySurveyStreet.END_FOOD_CHOISE.toString())) {
                             if (!message.equals("Пропустить")) {
@@ -147,7 +147,7 @@ public class TelegramBot extends TelegramLongPollingBot {
                     } catch (TelegramApiException e) {
                         e.printStackTrace();
                     }
-                    break;
+                }
             }
         } else if (update.hasCallbackQuery()) {
             String data = update.getCallbackQuery().getData();
@@ -155,9 +155,9 @@ public class TelegramBot extends TelegramLongPollingBot {
             User user = userService.getUser(chatId);
             StationarySurveyStreet currentState = StationarySurveyStreet.valueOf(user.getCurrentState());
             switch (currentState) {
-                case START_SURVEY:
+                case START_SURVEY -> {
                     switch (data) {
-                        case "HOME":
+                        case "HOME" -> {
                             try {
                                 BotButtons.healthChoise(chatId, this);
 
@@ -166,8 +166,8 @@ public class TelegramBot extends TelegramLongPollingBot {
                                      TelegramApiException e) {
                                 e.printStackTrace();
                             }
-                            break;
-                        case "STREET":
+                        }
+                        case "STREET" -> {
                             try {
                                 BotButtons.cityChoise(chatId, this);
                                 userService.setCurrentState(user, StationarySurveyStreet.CITY_CHOISE);
@@ -175,10 +175,10 @@ public class TelegramBot extends TelegramLongPollingBot {
                                      TelegramApiException e) {
                                 e.printStackTrace();
                             }
-                            break;
+                        }
                     }
-                    break;
-                case CITY_CHOISE:
+                }
+                case CITY_CHOISE -> {
                     try {
                         BotButtons.eventChoise(chatId, this);
                         userService.setCity(user, data);
@@ -187,8 +187,8 @@ public class TelegramBot extends TelegramLongPollingBot {
                              TelegramApiException e) {
                         e.printStackTrace();
                     }
-                    break;
-                case EVENT_CHOISE:
+                }
+                case EVENT_CHOISE -> {
                     try {
                         List<Event> events = searchEventService.getRecommendation(user, data);
                         City city = recipientCoordinatesCity.getCoordinates(CityButtons.getNameCityOnId(user.getCity()));
@@ -207,9 +207,8 @@ public class TelegramBot extends TelegramLongPollingBot {
                     } catch (TelegramApiException | JsonProcessingException e) {
                         e.printStackTrace();
                     }
-                    break;
-
-                case HEALTH_CHOISE:
+                }
+                case HEALTH_CHOISE -> {
                     try {
                         if (!data.equals("SKIP")) {
                             Health health = healthRepository.findByHealthLabel(data);
@@ -221,8 +220,8 @@ public class TelegramBot extends TelegramLongPollingBot {
                              TelegramApiException e) {
                         e.printStackTrace();
                     }
-                    break;
-                case MEAL_CHOISE:
+                }
+                case MEAL_CHOISE -> {
                     try {
                         if (!data.equals("SKIP")) {
                             Meal meal = mealRepository.findByMealLabel(data);
@@ -235,8 +234,8 @@ public class TelegramBot extends TelegramLongPollingBot {
                              TelegramApiException e) {
                         e.printStackTrace();
                     }
-                    break;
-                case DISHES_CHOISE:
+                }
+                case DISHES_CHOISE -> {
                     try {
                         if (!data.equals("SKIP")) {
                             Dish dish = dishRepository.findByDishLabel(data);
@@ -248,8 +247,8 @@ public class TelegramBot extends TelegramLongPollingBot {
                              TelegramApiException e) {
                         e.printStackTrace();
                     }
-                    break;
-                case COUNTRY_CHOISE:
+                }
+                case COUNTRY_CHOISE -> {
                     try {
                         if (!data.equals("SKIP")) {
                             Cuisine cuisine = cuisineRepository.findByCuisineLabel(data);
@@ -260,7 +259,7 @@ public class TelegramBot extends TelegramLongPollingBot {
                     } catch (TelegramApiException e) {
                         e.printStackTrace();
                     }
-                    break;
+                }
             }
         }
     }

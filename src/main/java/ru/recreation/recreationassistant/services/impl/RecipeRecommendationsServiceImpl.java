@@ -41,58 +41,60 @@ public class RecipeRecommendationsServiceImpl implements RecipeRecommendationsSe
 
     @Override
     public List<Recipe> getRecipeRecommendations(User user, String userRequest) {
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-
-        MultiValueMap<String, String> map = new LinkedMultiValueMap<>();
-
-        map.add("app_id", appId);
-        map.add("app_key", appKey);
-        map.add("type", "public");
-
-        Set<Health> healthTags = user.getHealthTags();
-        Set<Meal> mealTags = user.getMealTags();
-        Set<Cuisine> cuisineTags = user.getCuisineTags();
-        Set<Dish> dishTags = user.getDishTags();
-
-        if (StringUtils.hasText(userRequest)) {
-            map.add("q", userRequest);
-        }
-        if (!healthTags.isEmpty()) {
-            map.addAll("health", healthTags.stream().map(Health::getHealthLabel).collect(Collectors.toList()));
-        }
-        if (!cuisineTags.isEmpty()) {
-            map.addAll("cuisineType", cuisineTags.stream().map(Cuisine::getCuisineLabel).collect(Collectors.toList()));
-        }
-        if (!mealTags.isEmpty()) {
-            map.addAll("mealType", mealTags.stream().map(Meal::getMealLabel).collect(Collectors.toList()));
-        }
-        if (!dishTags.isEmpty()) {
-            map.addAll("dishType", dishTags.stream().map(Dish::getDishLabel).collect(Collectors.toList()));
-        }
-
-
-        HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(headers);
-
-        RestTemplate restTemplate = new RestTemplate();
-        ObjectMapper mapper = new ObjectMapper();
-
-        UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(URL).queryParams(map);
-        UriComponents components = builder.build().encode();
-
-        URI uri = components.toUri();
-        ResponseEntity<String> response = restTemplate.exchange(uri, HttpMethod.GET, request, String.class);
-        RecipeHits hits;
         try {
-            hits = mapper.readValue(response.getBody(), RecipeHits.class);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
+            log.info("RecipeRecomService getRecipeRecommendations method start");
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
 
-        if (hits != null) {
-            return hits.hits.stream().limit(RECIPE_LIMIT).map(recipeRecommendation -> recipeRecommendation.recipe).collect(Collectors.toList());
+            MultiValueMap<String, String> map = new LinkedMultiValueMap<>();
+            log.info("Looking for appId and appKey in config.properties ...");
+            map.add("app_id", appId);
+            map.add("app_key", appKey);
+            map.add("type", "public");
+            Set<Health> healthTags = user.getHealthTags();
+            Set<Meal> mealTags = user.getMealTags();
+            Set<Cuisine> cuisineTags = user.getCuisineTags();
+            Set<Dish> dishTags = user.getDishTags();
+            log.info("Addins params to request ...");
+            if (StringUtils.hasText(userRequest)) {
+                map.add("q", userRequest);
+            }
+            if (!healthTags.isEmpty()) {
+                map.addAll("health", healthTags.stream().map(Health::getHealthLabel).collect(Collectors.toList()));
+            }
+            if (!cuisineTags.isEmpty()) {
+                map.addAll("cuisineType", cuisineTags.stream().map(Cuisine::getCuisineLabel).collect(Collectors.toList()));
+            }
+            if (!mealTags.isEmpty()) {
+                map.addAll("mealType", mealTags.stream().map(Meal::getMealLabel).collect(Collectors.toList()));
+            }
+            if (!dishTags.isEmpty()) {
+                map.addAll("dishType", dishTags.stream().map(Dish::getDishLabel).collect(Collectors.toList()));
+            }
+
+
+            HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(headers);
+
+            RestTemplate restTemplate = new RestTemplate();
+            ObjectMapper mapper = new ObjectMapper();
+
+            UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(URL).queryParams(map);
+            UriComponents components = builder.build().encode();
+
+            URI uri = components.toUri();
+            log.info("Making request ...");
+            ResponseEntity<String> response = restTemplate.exchange(uri, HttpMethod.GET, request, String.class);
+            RecipeHits hits;
+            hits = mapper.readValue(response.getBody(), RecipeHits.class);
+
+            if (hits != null) {
+
+                return hits.hits.stream().limit(RECIPE_LIMIT).map(recipeRecommendation -> recipeRecommendation.recipe).collect(Collectors.toList());
+            }
+            return new ArrayList<>();
+        } catch (JsonProcessingException e) {
+            log.error("JsonProcessingException during readValue from response");
+            throw new RuntimeException();
         }
-        return new ArrayList<>();
     }
 }
