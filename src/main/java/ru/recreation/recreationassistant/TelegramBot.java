@@ -151,16 +151,6 @@ public class TelegramBot extends TelegramLongPollingBot {
                                 e.printStackTrace();
                             }
                             break;
-                        case "ALL":
-                            startChoise = "ALL";
-                            try {
-                                BotButtons.healthChoise(chatId, this);
-                                currentState = StationarySurveyStreet.HEALTH_CHOISE;
-                            } catch (InvocationTargetException | NoSuchMethodException | IllegalAccessException |
-                                     TelegramApiException e) {
-                                e.printStackTrace();
-                            }
-                            break;
                     }
                     break;
                 case CITY_CHOISE:
@@ -177,17 +167,15 @@ public class TelegramBot extends TelegramLongPollingBot {
                 case EVENT_CHOISE:
                     try {
                         category = data;
-                        StringBuilder message = new StringBuilder("В вашем городе мы рекомендуем посетить:\n");
                         List<Event> events = searchEventService.getRecommendation(user, category);
-                        String location = CityButtons.getNameCityOnId(user.getCity());
-                        City city = recipientCoordinatesCity.getCoordinates(location);
+                        City city = recipientCoordinatesCity.getCoordinates(CityButtons.getNameCityOnId(user.getCity()));
                         String recommendationClothes = weatherHelperService.getRecommendation(city);
+                        StringBuilder message = new StringBuilder("В вашем городе мы рекомендуем посетить:\n");
                         int i = 1;
                         for (Event event : events) {
                             message.append(i++).append(". Название: ").append(event.title).append("\n");
                             message.append("   Находится по адресу: ").append(event.address).append("\n");
                             message.append("   Подробно можно узнать на сайте: ").append(event.site_url).append("\n");
-                            message.append("   Либо по номеру телефона: ").append(event.phone).append("\n\n");
                             TelegramChatUtils.sendMessage(this, chatId, message.toString());
                             message = new StringBuilder();
                         }
@@ -238,39 +226,33 @@ public class TelegramBot extends TelegramLongPollingBot {
                         Cuisine cuisine = cuisineRepository.findByCuisineLabel(data);
                         user.getCuisineTags().add(cuisine);
                         userRepository.saveAndFlush(user);
-                        if (!startChoise.equals("ALL")) {
-                            TelegramChatUtils.sendMessage(this, chatId, "Опрос завершён, результаты...\nВведите команду /menu для нового прохождения опроса");
-                            currentState = StationarySurveyStreet.START_SURVEY;
-                            List<Recipe> recipeRecommendations = recipeRecommendationsService.getRecipeRecommendations(user, "");
-                            StringBuilder recommendation = new StringBuilder("Предлагаемые рецепты по вашим предпочтениям...:\n");
-                            if (recipeRecommendations.isEmpty()) {
-                                TelegramChatUtils.sendMessage(this, chatId, "К сожалению, мы ничего не нашли :(");
-                            }
-                            for (Recipe recipe : recipeRecommendations) {
-                                recommendation.append("Название блюда: ").append(translationService.translate(recipe.label)).append('\n');
-                                recommendation.append("Необходимые ингридиенты: \n");
-                                StringBuilder finalRecommendation = recommendation;
-                                recipe.ingredientLines.forEach(s -> finalRecommendation.append(translationService.translate(s)).append('\n'));
-                                recommendation.append("Примерное время приготовления: ").append(recipe.totalTime).append(" минут\n");
-                                recommendation.append("Калорийность блюда: ").append(decimalFormat.format(Double.parseDouble(recipe.calories))).append("\n");
-                                recommendation.append("Кухня: ").append(translationService.translate(recipe.cuisineType.stream().findFirst().orElse("Не определено"))).append("\n");
-                                recommendation.append("Узнать подробнее о рецепте: ").append(recipe.url);
-                                TelegramChatUtils.sendMessage(this, chatId, recommendation.toString());
-                                recommendation = new StringBuilder("\n");
-                            }
-
-                            user.getCuisineTags().clear();
-                            user.getMealTags().clear();
-                            user.getHealthTags().clear();
-                            user.getDishTags().clear();
-
-                            userRepository.saveAndFlush(user);
-                        } else {
-                            BotButtons.cityChoise(chatId, this);
-                            currentState = StationarySurveyStreet.CITY_CHOISE;
+                        TelegramChatUtils.sendMessage(this, chatId, "Опрос завершён, результаты...\nВведите команду /menu для нового прохождения опроса");
+                        currentState = StationarySurveyStreet.START_SURVEY;
+                        List<Recipe> recipeRecommendations = recipeRecommendationsService.getRecipeRecommendations(user, "");
+                        StringBuilder recommendation = new StringBuilder("Предлагаемые рецепты по вашим предпочтениям...:\n");
+                        if (recipeRecommendations.isEmpty()) {
+                            TelegramChatUtils.sendMessage(this, chatId, "К сожалению, мы ничего не нашли :(");
                         }
-                    } catch (InvocationTargetException | NoSuchMethodException | IllegalAccessException |
-                             TelegramApiException e) {
+                        for (Recipe recipe : recipeRecommendations) {
+                            recommendation.append("Название блюда: ").append(translationService.translate(recipe.label)).append('\n');
+                            recommendation.append("Необходимые ингридиенты: \n");
+                            StringBuilder finalRecommendation = recommendation;
+                            recipe.ingredientLines.forEach(s -> finalRecommendation.append(translationService.translate(s)).append('\n'));
+                            recommendation.append("Примерное время приготовления: ").append(recipe.totalTime).append(" минут\n");
+                            recommendation.append("Калорийность блюда: ").append(decimalFormat.format(Double.parseDouble(recipe.calories))).append("\n");
+                            recommendation.append("Кухня: ").append(translationService.translate(recipe.cuisineType.stream().findFirst().orElse("Не определено"))).append("\n");
+                            recommendation.append("Узнать подробнее о рецепте: ").append(recipe.url);
+                            TelegramChatUtils.sendMessage(this, chatId, recommendation.toString());
+                            recommendation = new StringBuilder("\n");
+                        }
+
+                        user.getCuisineTags().clear();
+                        user.getMealTags().clear();
+                        user.getHealthTags().clear();
+                        user.getDishTags().clear();
+
+                        userRepository.saveAndFlush(user);
+                    } catch (TelegramApiException e) {
                         e.printStackTrace();
                     }
                     break;

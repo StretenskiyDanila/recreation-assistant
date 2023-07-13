@@ -8,5 +8,4 @@ public class Event {
     public String title;
     public String site_url;
     public String address;
-    public String phone;
 }
