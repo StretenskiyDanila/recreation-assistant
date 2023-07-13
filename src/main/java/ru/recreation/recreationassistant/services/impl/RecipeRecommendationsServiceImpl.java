@@ -18,6 +18,7 @@ import ru.recreation.recreationassistant.models.Recipe;
 import ru.recreation.recreationassistant.models.RecipeHits;
 import ru.recreation.recreationassistant.services.RecipeRecommendationsService;
 
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -80,7 +81,8 @@ public class RecipeRecommendationsServiceImpl implements RecipeRecommendationsSe
         UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(URL).queryParams(map);
         UriComponents components = builder.build().encode();
 
-        ResponseEntity<String> response = restTemplate.exchange(components.toUri(), HttpMethod.GET, request, String.class);
+        URI uri = components.toUri();
+        ResponseEntity<String> response = restTemplate.exchange(uri, HttpMethod.GET, request, String.class);
         RecipeHits hits;
         try {
             hits = mapper.readValue(response.getBody(), RecipeHits.class);

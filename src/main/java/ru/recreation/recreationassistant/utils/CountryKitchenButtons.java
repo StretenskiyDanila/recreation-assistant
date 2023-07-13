@@ -6,7 +6,9 @@ public enum CountryKitchenButtons implements ButtonInfo {
     BUTTON_FRZ("Французская", "french"),
     BUTTON_ITA("Итальянская", "italian"),
     BUTTON_ASIA("Азиатская", "asian"),
-    BUTTON_WORLD("Мировая", "world");
+    BUTTON_WORLD("Мировая", "world"),
+    BUTTON_SKIP("Пропустить", "SKIP");
+
 
     CountryKitchenButtons(String text, String id) {
         buttonText = text;

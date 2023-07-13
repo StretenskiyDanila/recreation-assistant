@@ -46,19 +46,15 @@ public class TelegramBot extends TelegramLongPollingBot {
 
     private final TranslationService translationService;
 
+    private final UserService userService;
+
 
     private final String HELP_MESSAGE = "help";
-
-    private StationarySurveyStreet currentState;
-    private String startChoise = "start";
-
-    private String location;
-    private String category;
 
     public TelegramBot(BotConfig config, UserRepository userRepository, RecipeRecommendationsService recipeRecommendationsService,
                        SearchEventService searchEventService, WeatherHelperService weatherHelperService,
                        RecipientCoordinatesCity recipientCoordinatesCity, HealthRepository healthRepository,
-                       DishRepository dishRepository, MealRepository mealRepository, CuisineRepository cuisineRepository, TranslationService translationService) {
+                       DishRepository dishRepository, MealRepository mealRepository, CuisineRepository cuisineRepository, TranslationService translationService, UserService userService) {
         this.config = config;
         this.userRepository = userRepository;
         this.recipeRecommendationsService = recipeRecommendationsService;
@@ -70,6 +66,7 @@ public class TelegramBot extends TelegramLongPollingBot {
         this.mealRepository = mealRepository;
         this.cuisineRepository = cuisineRepository;
         this.translationService = translationService;
+        this.userService = userService;
         List<BotCommand> listOfCommands = new ArrayList<>();
         listOfCommands.add(new BotCommand("/start", "Приветственное сообщение"));
         listOfCommands.add(new BotCommand("/menu", "Начало работы"));
@@ -84,19 +81,20 @@ public class TelegramBot extends TelegramLongPollingBot {
     @Override
     public void onUpdateReceived(Update update) {
         if (update.hasMessage() && update.getMessage().hasText()) {
-            String telegramChatId = String.valueOf(update.getMessage().getChatId());
-            if (!userRepository.existsByTelegramChatId(telegramChatId)) {
-                String userName = update.getMessage().getFrom().getUserName();
-                log.info("Added new user with name {} and id {}", userName, telegramChatId);
-                userRepository.save(new User(userName, telegramChatId));
+            User user = new User();
+            Long chatId = update.getMessage().getChatId();
+            String userName = update.getMessage().getChat().getUserName();
+            if (!userRepository.existsByTelegramChatId(String.valueOf(chatId))) {
+                userService.save(user, userName, chatId);
+                log.info("Added new user with name {} and id {}", userName, chatId);
+            } else {
+                user = userService.getUser(chatId);
             }
-            long chatId = update.getMessage().getChatId();
             String message = update.getMessage().getText();
-            final String name = update.getMessage().getChat().getUserName();
             switch (message) {
                 case "/start":
                     try {
-                        TelegramChatUtils.sendMessage(this, chatId, "Привет, " + name + "!\n" +
+                        TelegramChatUtils.sendMessage(this, chatId, "Привет, " + userName + "!\n" +
                                 "Для началы работы введите команду /menu");
                     } catch (TelegramApiException e) {
                         e.printStackTrace();
@@ -104,7 +102,7 @@ public class TelegramBot extends TelegramLongPollingBot {
                     break;
                 case "/menu":
                     try {
-                        currentState = StationarySurveyStreet.START_SURVEY;
+                        userService.setCurrentState(user, StationarySurveyStreet.START_SURVEY);
                         BotButtons.startChoise(chatId, this);
                     } catch (TelegramApiException | InvocationTargetException | NoSuchMethodException |
                              IllegalAccessException e) {
@@ -129,14 +127,16 @@ public class TelegramBot extends TelegramLongPollingBot {
         } else if (update.hasCallbackQuery()) {
             String data = update.getCallbackQuery().getData();
             long chatId = update.getCallbackQuery().getMessage().getChatId();
-            User user = userRepository.findByTelegramChatId(String.valueOf(chatId)).get();
+            User user = userService.getUser(chatId);
+            StationarySurveyStreet currentState = StationarySurveyStreet.valueOf(user.getCurrentState());
             switch (currentState) {
                 case START_SURVEY:
                     switch (data) {
                         case "HOME":
                             try {
                                 BotButtons.healthChoise(chatId, this);
-                                currentState = StationarySurveyStreet.HEALTH_CHOISE;
+
+                                userService.setCurrentState(user, StationarySurveyStreet.HEALTH_CHOISE);
                             } catch (InvocationTargetException | NoSuchMethodException | IllegalAccessException |
                                      TelegramApiException e) {
                                 e.printStackTrace();
@@ -145,7 +145,7 @@ public class TelegramBot extends TelegramLongPollingBot {
                         case "STREET":
                             try {
                                 BotButtons.cityChoise(chatId, this);
-                                currentState = StationarySurveyStreet.CITY_CHOISE;
+                                userService.setCurrentState(user, StationarySurveyStreet.CITY_CHOISE);
                             } catch (InvocationTargetException | NoSuchMethodException | IllegalAccessException |
                                      TelegramApiException e) {
                                 e.printStackTrace();
@@ -156,9 +156,8 @@ public class TelegramBot extends TelegramLongPollingBot {
                 case CITY_CHOISE:
                     try {
                         BotButtons.eventChoise(chatId, this);
-                        user.setCity(data);
-                        userRepository.saveAndFlush(user);
-                        currentState = StationarySurveyStreet.EVENT_CHOISE;
+                        userService.setCity(user, data);
+                        userService.setCurrentState(user, StationarySurveyStreet.EVENT_CHOISE);
                     } catch (InvocationTargetException | NoSuchMethodException | IllegalAccessException |
                              TelegramApiException e) {
                         e.printStackTrace();
@@ -166,8 +165,7 @@ public class TelegramBot extends TelegramLongPollingBot {
                     break;
                 case EVENT_CHOISE:
                     try {
-                        category = data;
-                        List<Event> events = searchEventService.getRecommendation(user, category);
+                        List<Event> events = searchEventService.getRecommendation(user, data);
                         City city = recipientCoordinatesCity.getCoordinates(CityButtons.getNameCityOnId(user.getCity()));
                         String recommendationClothes = weatherHelperService.getRecommendation(city);
                         StringBuilder message = new StringBuilder("В вашем городе мы рекомендуем посетить:\n");
@@ -187,11 +185,12 @@ public class TelegramBot extends TelegramLongPollingBot {
 
                 case HEALTH_CHOISE:
                     try {
-                        Health health = healthRepository.findByHealthLabel(data);
-                        user.getHealthTags().add(health);
-                        userRepository.saveAndFlush(user);
+                        if (!data.equals("SKIP")) {
+                            Health health = healthRepository.findByHealthLabel(data);
+                            userService.addHealthTag(user, health);
+                        }
                         BotButtons.mealsChoise(chatId, this);
-                        currentState = StationarySurveyStreet.MEAL_CHOISE;
+                        userService.setCurrentState(user, StationarySurveyStreet.MEAL_CHOISE);
                     } catch (InvocationTargetException | NoSuchMethodException | IllegalAccessException |
                              TelegramApiException e) {
                         e.printStackTrace();
@@ -199,11 +198,13 @@ public class TelegramBot extends TelegramLongPollingBot {
                     break;
                 case MEAL_CHOISE:
                     try {
-                        Meal meal = mealRepository.findByMealLabel(data);
-                        user.getMealTags().add(meal);
-                        userRepository.saveAndFlush(user);
+                        if (!data.equals("SKIP")) {
+                            Meal meal = mealRepository.findByMealLabel(data);
+                            userService.addMealTag(user, meal);
+
+                        }
                         BotButtons.dishesChoise(chatId, this);
-                        currentState = StationarySurveyStreet.DISHES_CHOISE;
+                        userService.setCurrentState(user, StationarySurveyStreet.DISHES_CHOISE);
                     } catch (InvocationTargetException | NoSuchMethodException | IllegalAccessException |
                              TelegramApiException e) {
                         e.printStackTrace();
@@ -211,11 +212,12 @@ public class TelegramBot extends TelegramLongPollingBot {
                     break;
                 case DISHES_CHOISE:
                     try {
-                        Dish dish = dishRepository.findByDishLabel(data);
-                        user.getDishTags().add(dish);
-                        userRepository.saveAndFlush(user);
+                        if (!data.equals("SKIP")) {
+                            Dish dish = dishRepository.findByDishLabel(data);
+                            userService.addDishTag(user, dish);
+                        }
                         BotButtons.countryChoise(chatId, this);
-                        currentState = StationarySurveyStreet.COUNTRY_CHOISE;
+                        userService.setCurrentState(user, StationarySurveyStreet.COUNTRY_CHOISE);
                     } catch (InvocationTargetException | NoSuchMethodException | IllegalAccessException |
                              TelegramApiException e) {
                         e.printStackTrace();
@@ -223,11 +225,11 @@ public class TelegramBot extends TelegramLongPollingBot {
                     break;
                 case COUNTRY_CHOISE:
                     try {
-                        Cuisine cuisine = cuisineRepository.findByCuisineLabel(data);
-                        user.getCuisineTags().add(cuisine);
+                        if (!data.equals("SKIP")) {
+                            Cuisine cuisine = cuisineRepository.findByCuisineLabel(data);
+                            userService.addCuisineTag(user, cuisine);
+                        }
                         userRepository.saveAndFlush(user);
-                        TelegramChatUtils.sendMessage(this, chatId, "Опрос завершён, результаты...\nВведите команду /menu для нового прохождения опроса");
-                        currentState = StationarySurveyStreet.START_SURVEY;
                         List<Recipe> recipeRecommendations = recipeRecommendationsService.getRecipeRecommendations(user, "");
                         StringBuilder recommendation = new StringBuilder("Предлагаемые рецепты по вашим предпочтениям...:\n");
                         if (recipeRecommendations.isEmpty()) {
@@ -246,12 +248,10 @@ public class TelegramBot extends TelegramLongPollingBot {
                             recommendation = new StringBuilder("\n");
                         }
 
-                        user.getCuisineTags().clear();
-                        user.getMealTags().clear();
-                        user.getHealthTags().clear();
-                        user.getDishTags().clear();
+                        userService.clearUserTags(user);
+                        TelegramChatUtils.sendMessage(this, chatId, "Опрос завершён, результаты...\nВведите команду /menu для нового прохождения опроса");
+                        userService.setCurrentState(user, StationarySurveyStreet.START_SURVEY);
 
-                        userRepository.saveAndFlush(user);
                     } catch (TelegramApiException e) {
                         e.printStackTrace();
                     }

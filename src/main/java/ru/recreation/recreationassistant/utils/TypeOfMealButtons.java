@@ -6,7 +6,9 @@ public enum TypeOfMealButtons implements ButtonInfo {
     BUTTON_DINNER("Обед", "lunch"),
     BUTTON_SUPPER("Ужин", "dinner"),
     BUTTON_SNACK("Перекус", "snack"),
-    BUTTON_TEA_PARTY("Чаепитие", "teatime");
+    BUTTON_TEA_PARTY("Чаепитие", "teatime"),
+    BUTTON_SKIP("Пропустить", "SKIP");
+
 
     TypeOfMealButtons(String text, String id) {
         buttonText = text;
