@@ -118,7 +118,32 @@ public class TelegramBot extends TelegramLongPollingBot {
                     break;
                 default:
                     try {
-                        TelegramChatUtils.sendMessage(this, chatId, "Пожалуйста, введите команду");
+                        if (userService.getUser(chatId).getCurrentState().equals(StationarySurveyStreet.END_FOOD_CHOISE.toString())) {
+                            if (!message.equals("Пропустить")) {
+                                List<Recipe> recipeRecommendations = recipeRecommendationsService.getRecipeRecommendations(user, message);
+                                StringBuilder recommendation = new StringBuilder("Предлагаемые рецепты по вашим предпочтениям...:\n");
+                                if (recipeRecommendations.isEmpty()) {
+                                    TelegramChatUtils.sendMessage(this, chatId, "К сожалению, мы ничего не нашли :(");
+                                }
+                                for (Recipe recipe : recipeRecommendations) {
+                                    recommendation.append("Название блюда: ").append(translationService.translate(recipe.label)).append('\n');
+                                    recommendation.append("Необходимые ингридиенты: \n");
+                                    StringBuilder finalRecommendation = recommendation;
+                                    recipe.ingredientLines.forEach(s -> finalRecommendation.append(translationService.translate(s)).append('\n'));
+                                    recommendation.append("Примерное время приготовления: ").append(recipe.totalTime).append(" минут\n");
+                                    recommendation.append("Калорийность блюда: ").append(decimalFormat.format(Double.parseDouble(recipe.calories))).append("\n");
+                                    recommendation.append("Кухня: ").append(translationService.translate(recipe.cuisineType.stream().findFirst().orElse("Не определено"))).append("\n");
+                                    recommendation.append("Узнать подробнее о рецепте: ").append(recipe.url);
+                                    TelegramChatUtils.sendMessage(this, chatId, recommendation.toString());
+                                    recommendation = new StringBuilder("\n");
+                                    userService.clearUserTags(user);
+                                    TelegramChatUtils.sendMessage(this, chatId, "Введите команду /menu для нового прохождения опроса");
+                                    userService.setCurrentState(user, StationarySurveyStreet.START_SURVEY);
+                                }
+                            }
+                        } else {
+                            TelegramChatUtils.sendMessage(this, chatId, "Пожалуйста, введите команду");
+                        }
                     } catch (TelegramApiException e) {
                         e.printStackTrace();
                     }
@@ -178,7 +203,7 @@ public class TelegramBot extends TelegramLongPollingBot {
                             message = new StringBuilder();
                         }
                         TelegramChatUtils.sendMessage(this, chatId, recommendationClothes);
-                        TelegramChatUtils.sendMessage(this, chatId, "Опрос завершён, результаты...\nВведите команду /menu для нового прохождения опроса");
+                        TelegramChatUtils.sendMessage(this, chatId, "Введите команду /menu для нового прохождения опроса");
                     } catch (TelegramApiException | JsonProcessingException e) {
                         e.printStackTrace();
                     }
@@ -230,29 +255,8 @@ public class TelegramBot extends TelegramLongPollingBot {
                             Cuisine cuisine = cuisineRepository.findByCuisineLabel(data);
                             userService.addCuisineTag(user, cuisine);
                         }
-                        userRepository.saveAndFlush(user);
-                        List<Recipe> recipeRecommendations = recipeRecommendationsService.getRecipeRecommendations(user, "");
-                        StringBuilder recommendation = new StringBuilder("Предлагаемые рецепты по вашим предпочтениям...:\n");
-                        if (recipeRecommendations.isEmpty()) {
-                            TelegramChatUtils.sendMessage(this, chatId, "К сожалению, мы ничего не нашли :(");
-                        }
-                        for (Recipe recipe : recipeRecommendations) {
-                            recommendation.append("Название блюда: ").append(translationService.translate(recipe.label)).append('\n');
-                            recommendation.append("Необходимые ингридиенты: \n");
-                            StringBuilder finalRecommendation = recommendation;
-                            recipe.ingredientLines.forEach(s -> finalRecommendation.append(translationService.translate(s)).append('\n'));
-                            recommendation.append("Примерное время приготовления: ").append(recipe.totalTime).append(" минут\n");
-                            recommendation.append("Калорийность блюда: ").append(decimalFormat.format(Double.parseDouble(recipe.calories))).append("\n");
-                            recommendation.append("Кухня: ").append(translationService.translate(recipe.cuisineType.stream().findFirst().orElse("Не определено"))).append("\n");
-                            recommendation.append("Узнать подробнее о рецепте: ").append(recipe.url);
-                            TelegramChatUtils.sendMessage(this, chatId, recommendation.toString());
-                            recommendation = new StringBuilder("\n");
-                        }
-
-                        userService.clearUserTags(user);
-                        TelegramChatUtils.sendMessage(this, chatId, "Опрос завершён, результаты...\nВведите команду /menu для нового прохождения опроса");
-                        userService.setCurrentState(user, StationarySurveyStreet.START_SURVEY);
-
+                        TelegramChatUtils.sendMessage(this, chatId, "Введите ваши предпочтения в еде:");
+                        userService.setCurrentState(user, StationarySurveyStreet.END_FOOD_CHOISE);
                     } catch (TelegramApiException e) {
                         e.printStackTrace();
                     }
