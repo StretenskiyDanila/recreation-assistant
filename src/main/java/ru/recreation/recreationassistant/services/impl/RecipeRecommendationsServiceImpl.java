@@ -30,6 +30,8 @@ public class RecipeRecommendationsServiceImpl implements RecipeRecommendationsSe
 
     private static final String URL = "https://api.edamam.com/api/recipes/v2";
 
+    private static final int RECIPE_LIMIT = 5;
+
     @Value("${edamam.app_id}")
     private String appId;
     @Value("${edamam.app_key}")
@@ -53,7 +55,7 @@ public class RecipeRecommendationsServiceImpl implements RecipeRecommendationsSe
         Set<Cuisine> cuisineTags = user.getCuisineTags();
         Set<Dish> dishTags = user.getDishTags();
 
-        if(StringUtils.hasText(userRequest)) {
+        if (StringUtils.hasText(userRequest)) {
             map.add("q", userRequest);
         }
         if (!healthTags.isEmpty()) {
@@ -87,7 +89,7 @@ public class RecipeRecommendationsServiceImpl implements RecipeRecommendationsSe
         }
 
         if (hits != null) {
-            return hits.hits.stream().map(recipeRecommendation -> recipeRecommendation.recipe).collect(Collectors.toList());
+            return hits.hits.stream().limit(RECIPE_LIMIT).map(recipeRecommendation -> recipeRecommendation.recipe).collect(Collectors.toList());
         }
         return new ArrayList<>();
     }

@@ -1,9 +1,9 @@
 package ru.recreation.recreationassistant.utils;
 
 public enum TypeOfHealthButtons implements ButtonInfo {
-    BUTTON_ALCOHOL("Алкогольный коктейль", "Alcohol-Cocktail"),
-    BUTTON_FREE_ALCOHOL("Безалкогольный коктейль", "Alcohol-Free"),
-    BUTTON_VEGETARIAN("Вегатарианское", "Vegetarian");
+    BUTTON_ALCOHOL("С алкоголем", "alcohol-cocktail"),
+    BUTTON_FREE_ALCOHOL("Без алкоголя", "alcohol-free"),
+    BUTTON_VEGETARIAN("Вегетарианская пища", "vegetarian");
 
     TypeOfHealthButtons(String text, String id) {
         buttonText = text;
