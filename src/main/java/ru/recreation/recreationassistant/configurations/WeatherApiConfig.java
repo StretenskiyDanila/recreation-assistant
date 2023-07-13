@@ -5,9 +5,9 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 
 @Configuration
-@PropertySource("weather_api.properties")
-public class ApiConfig {
-
+@PropertySource("config.properties")
+public class WeatherApiConfig {
+    private static final String URL_API = "https://api.weather.yandex.ru/v2/forecast";
     @Value("${api_key}")
     private String apiKey;
     @Value("${api_key_name}")
@@ -16,7 +16,9 @@ public class ApiConfig {
     public String getApiKey() {
         return apiKey;
     }
-
+    public String getUrlApi(){
+        return URL_API;
+    }
     public String getApiKeyName()
     {
         return apiKeyName;
