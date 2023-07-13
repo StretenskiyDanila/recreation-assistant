@@ -17,6 +17,8 @@ import ru.recreation.recreationassistant.entity.*;
 import ru.recreation.recreationassistant.models.Recipe;
 import ru.recreation.recreationassistant.models.RecipeHits;
 import ru.recreation.recreationassistant.services.RecipeRecommendationsService;
+import ru.recreation.recreationassistant.services.TranslationService;
+import ru.recreation.recreationassistant.utils.ListUtils;
 
 import java.net.URI;
 import java.util.ArrayList;
@@ -31,12 +33,20 @@ public class RecipeRecommendationsServiceImpl implements RecipeRecommendationsSe
 
     private static final String URL = "https://api.edamam.com/api/recipes/v2";
 
-    private static final int RECIPE_LIMIT = 5;
+
+    private final TranslationService translationService;
 
     @Value("${edamam.app_id}")
     private String appId;
     @Value("${edamam.app_key}")
     private String appKey;
+
+    @Value("${edamam.food_limit}")
+    private int recipeLimit;
+
+    public RecipeRecommendationsServiceImpl(TranslationService translationService) {
+        this.translationService = translationService;
+    }
 
 
     @Override
@@ -57,7 +67,7 @@ public class RecipeRecommendationsServiceImpl implements RecipeRecommendationsSe
             Set<Dish> dishTags = user.getDishTags();
             log.info("Addins params to request ...");
             if (StringUtils.hasText(userRequest)) {
-                map.add("q", userRequest);
+                map.add("q", translationService.translate(userRequest, "ru", "en"));
             }
             if (!healthTags.isEmpty()) {
                 map.addAll("health", healthTags.stream().map(Health::getHealthLabel).collect(Collectors.toList()));
@@ -88,8 +98,8 @@ public class RecipeRecommendationsServiceImpl implements RecipeRecommendationsSe
             hits = mapper.readValue(response.getBody(), RecipeHits.class);
 
             if (hits != null) {
-
-                return hits.hits.stream().limit(RECIPE_LIMIT).map(recipeRecommendation -> recipeRecommendation.recipe).collect(Collectors.toList());
+                return ListUtils.pickNRandom(hits.hits, recipeLimit).stream()
+                        .map(recipeRecommendation -> recipeRecommendation.recipe).collect(Collectors.toList());
             }
             return new ArrayList<>();
         } catch (JsonProcessingException e) {
@@ -97,4 +107,6 @@ public class RecipeRecommendationsServiceImpl implements RecipeRecommendationsSe
             throw new RuntimeException();
         }
     }
+
+
 }

@@ -17,11 +17,11 @@ public class TranslationServiceImpl implements TranslationService {
     private static final String URL = "https://translate.googleapis.com/translate_a/single";
 
     @Override
-    public String translate(String line) {
+    public String translate(String line, String from, String to) {
         MultiValueMap<String, String> map = new LinkedMultiValueMap<>();
         map.add("client", "gtx");
-        map.add("sl", "en");
-        map.add("tl", "ru");
+        map.add("sl", from);
+        map.add("tl", to);
         map.add("dt", "t");
         map.add("q", line);
 
@@ -32,6 +32,12 @@ public class TranslationServiceImpl implements TranslationService {
 
         return parseResponse(response);
     }
+
+    @Override
+    public String translate(String line) {
+        return translate(line, "en", "ru");
+    }
+
 
     private String parseResponse(ResponseEntity<String> response) {
         Gson gson = new Gson();
