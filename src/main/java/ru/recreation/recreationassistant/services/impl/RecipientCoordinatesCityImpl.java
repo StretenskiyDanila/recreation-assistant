@@ -11,7 +11,6 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
-import ru.recreation.recreationassistant.entity.User;
 import ru.recreation.recreationassistant.models.City;
 import ru.recreation.recreationassistant.services.RecipientCoordinatesCity;
 
@@ -24,14 +23,14 @@ public class RecipientCoordinatesCityImpl implements RecipientCoordinatesCity {
     private String appKey;
 
     @Override
-    public City getCoordinates(User user) {
+    public City getCoordinates(String city) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
 
         MultiValueMap<String, String> map = new LinkedMultiValueMap<>();
 
         map.add("apikey", appKey);
-        map.add("geocode", user.getCity());
+        map.add("geocode", city);
         map.add("format", "json");
 
         HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(headers);

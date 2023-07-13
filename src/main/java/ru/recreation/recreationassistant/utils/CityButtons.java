@@ -31,4 +31,13 @@ public enum CityButtons implements ButtonInfo {
     public String getButtonId() {
         return buttonId;
     }
+
+    public static String getNameCityOnId(String cityId) {
+        for (CityButtons cityButton : CityButtons.values()) {
+            if (cityButton.getButtonId().equals(cityId)) {
+                return cityButton.getButtonText();
+            }
+        }
+        throw new IllegalArgumentException("Нет города с таким id");
+    }
 }

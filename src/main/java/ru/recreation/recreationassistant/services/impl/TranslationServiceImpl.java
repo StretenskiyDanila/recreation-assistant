@@ -11,9 +11,6 @@ import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 import ru.recreation.recreationassistant.services.TranslationService;
 
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-
 @Service
 public class TranslationServiceImpl implements TranslationService {
 
