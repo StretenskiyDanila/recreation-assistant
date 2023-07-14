@@ -112,8 +112,12 @@ public class TelegramBot extends TelegramLongPollingBot {
                 case "/help" -> {
                     log.info("/help command enter");
                     try {
-                        String HELP_MESSAGE = "help";
-                        TelegramChatUtils.sendMessage(this, chatId, HELP_MESSAGE);
+                        StringBuilder HELP_MESSAGE = new StringBuilder("Привет, это бот-помощник по отдыху, который поможет Вам с пользой провести время!\n" +
+                                "Для начала необходимо ввести или выбрать в меню команду /menu, Вам нужно будет выбрать, чем вы желаете заняться: пойти гулять или остаться дома\n\n" +
+                                "В случае, если Вы решите остаться дома, Вам будет предложено пройти опрос, который сформирует Ваши предпочтения в еде." +
+                                " По результатам опроса Вы получите рецепты различных блюд и сможете их повторить.\n" +
+                                "\nЕсли же Вы собираетесь идти на улицу, бот подскажет, какая сейчас погода в выбранном городе, а так же отправит Вам афишу мероприятий");
+                        TelegramChatUtils.sendMessage(this, chatId, HELP_MESSAGE.toString());
                     } catch (TelegramApiException e) {
                         log.error("TelegramApiException occurred");
                     }
