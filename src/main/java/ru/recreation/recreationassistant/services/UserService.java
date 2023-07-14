@@ -1,7 +1,7 @@
 package ru.recreation.recreationassistant.services;
 
 import ru.recreation.recreationassistant.entity.*;
-import ru.recreation.recreationassistant.utils.StationarySurveyStreet;
+import ru.recreation.recreationassistant.utils.StationarySurveyState;
 
 public interface UserService {
 
@@ -11,7 +11,7 @@ public interface UserService {
 
     void setCity(User user, String city);
 
-    void setCurrentState(User user, StationarySurveyStreet state);
+    void setCurrentState(User user, StationarySurveyState state);
 
     void addHealthTag(User user, Health health);
 

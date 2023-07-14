@@ -12,31 +12,31 @@ import java.util.List;
 
 public class BotButtons {
 
-    public static void startChoise(long chatId, TelegramLongPollingBot bot) throws InvocationTargetException, NoSuchMethodException, IllegalAccessException, TelegramApiException {
+    public static void startChoice(long chatId, TelegramLongPollingBot bot) throws InvocationTargetException, NoSuchMethodException, IllegalAccessException, TelegramApiException {
         createButtons("Чем Вы планируете заняться?", StartButtons.class, bot, chatId);
     }
 
-    public static void cityChoise(long chatId, TelegramLongPollingBot bot) throws InvocationTargetException, NoSuchMethodException, IllegalAccessException, TelegramApiException {
+    public static void cityChoice(long chatId, TelegramLongPollingBot bot) throws InvocationTargetException, NoSuchMethodException, IllegalAccessException, TelegramApiException {
         createButtons("Выберите город:", CityButtons.class, bot, chatId);
     }
 
-    public static void eventChoise(long chatId, TelegramLongPollingBot bot) throws InvocationTargetException, NoSuchMethodException, IllegalAccessException, TelegramApiException {
+    public static void eventChoice(long chatId, TelegramLongPollingBot bot) throws InvocationTargetException, NoSuchMethodException, IllegalAccessException, TelegramApiException {
         createButtons("Выберите мероприятие:", EventButtons.class, bot, chatId);
     }
 
-    public static void countryChoise(long chatId, TelegramLongPollingBot bot) throws InvocationTargetException, NoSuchMethodException, IllegalAccessException, TelegramApiException {
+    public static void countryChoice(long chatId, TelegramLongPollingBot bot) throws InvocationTargetException, NoSuchMethodException, IllegalAccessException, TelegramApiException {
         createButtons("Выберите страну кухни:", CountryKitchenButtons.class, bot, chatId);
     }
 
-    public static void dishesChoise(long chatId, TelegramLongPollingBot bot) throws InvocationTargetException, NoSuchMethodException, IllegalAccessException, TelegramApiException {
+    public static void dishesChoice(long chatId, TelegramLongPollingBot bot) throws InvocationTargetException, NoSuchMethodException, IllegalAccessException, TelegramApiException {
         createButtons("Выберите тип посуды:", TypeOfDishesButtons.class, bot, chatId);
     }
 
-    public static void healthChoise(long chatId, TelegramLongPollingBot bot) throws InvocationTargetException, NoSuchMethodException, IllegalAccessException, TelegramApiException {
+    public static void healthChoice(long chatId, TelegramLongPollingBot bot) throws InvocationTargetException, NoSuchMethodException, IllegalAccessException, TelegramApiException {
         createButtons("Выберите тип пищи:", TypeOfHealthButtons.class, bot, chatId);
     }
 
-    public static void mealsChoise(long chatId, TelegramLongPollingBot bot) throws InvocationTargetException, NoSuchMethodException, IllegalAccessException, TelegramApiException {
+    public static void mealsChoice(long chatId, TelegramLongPollingBot bot) throws InvocationTargetException, NoSuchMethodException, IllegalAccessException, TelegramApiException {
         createButtons("Выберите приём пищи:", TypeOfMealButtons.class, bot, chatId);
     }
 

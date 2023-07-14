@@ -4,7 +4,7 @@ import org.springframework.stereotype.Service;
 import ru.recreation.recreationassistant.entity.*;
 import ru.recreation.recreationassistant.repositories.UserRepository;
 import ru.recreation.recreationassistant.services.UserService;
-import ru.recreation.recreationassistant.utils.StationarySurveyStreet;
+import ru.recreation.recreationassistant.utils.StationarySurveyState;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -32,7 +32,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void setCurrentState(User user, StationarySurveyStreet state) {
+    public void setCurrentState(User user, StationarySurveyState state) {
         user.setCurrentState(state.name());
         update(user);
     }
