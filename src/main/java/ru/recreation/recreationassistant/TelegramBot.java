@@ -11,6 +11,7 @@ import org.telegram.telegrambots.meta.api.objects.commands.scope.BotCommandScope
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import ru.recreation.recreationassistant.configurations.BotConfig;
 import ru.recreation.recreationassistant.entity.*;
+import ru.recreation.recreationassistant.exceptions.UserNotFoundException;
 import ru.recreation.recreationassistant.models.City;
 import ru.recreation.recreationassistant.models.Event;
 import ru.recreation.recreationassistant.models.Recipe;
@@ -25,6 +26,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Component
 @Slf4j
@@ -79,15 +81,18 @@ public class TelegramBot extends TelegramLongPollingBot {
     @Override
     public void onUpdateReceived(Update update) {
         if (update.hasMessage() && update.getMessage().hasText()) {
-            User user = new User();
             Long chatId = update.getMessage().getChatId();
             String userName = update.getMessage().getChat().getUserName();
+            User user = userService.getUser(chatId).orElseGet(() -> {
+                User added = userService.save(new User(), userName, chatId);
+                log.info("Added new user with name {} and id {}", userName, chatId);
+                return added;
+            });
             if (!userRepository.existsByTelegramChatId(String.valueOf(chatId))) {
                 userService.save(user, userName, chatId);
                 log.info("Added new user with name {} and id {}", userName, chatId);
-            } else {
-                user = userService.getUser(chatId);
             }
+
             String message = update.getMessage().getText();
             switch (message) {
                 case "/start" -> {
@@ -112,19 +117,19 @@ public class TelegramBot extends TelegramLongPollingBot {
                 case "/help" -> {
                     log.info("/help command enter");
                     try {
-                        StringBuilder HELP_MESSAGE = new StringBuilder("Привет, это бот-помощник по отдыху, который поможет Вам с пользой провести время!\n" +
+                        String HELP_MESSAGE = "Привет, это бот-помощник по отдыху, который поможет Вам с пользой провести время!\n" +
                                 "Для начала необходимо ввести или выбрать в меню команду /menu, Вам нужно будет выбрать, чем вы желаете заняться: пойти гулять или остаться дома\n\n" +
                                 "В случае, если Вы решите остаться дома, Вам будет предложено пройти опрос, который сформирует Ваши предпочтения в еде." +
                                 " По результатам опроса Вы получите рецепты различных блюд и сможете их повторить.\n" +
-                                "\nЕсли же Вы собираетесь идти на улицу, бот подскажет, какая сейчас погода в выбранном городе, а так же отправит Вам афишу мероприятий");
-                        TelegramChatUtils.sendMessage(this, chatId, HELP_MESSAGE.toString());
+                                "\nЕсли же Вы собираетесь идти на улицу, бот подскажет, какая сейчас погода в выбранном городе, а так же отправит Вам афишу мероприятий";
+                        TelegramChatUtils.sendMessage(this, chatId, HELP_MESSAGE);
                     } catch (TelegramApiException e) {
                         log.error("TelegramApiException occurred");
                     }
                 }
                 default -> {
                     try {
-                        if (userService.getUser(chatId).getCurrentState().equals(StationarySurveyStreet.END_FOOD_CHOISE.name())) {
+                        if (user.getCurrentState().equals(StationarySurveyStreet.END_FOOD_CHOISE.name())) {
                             if (message.equalsIgnoreCase("Пропустить")) {
                                 message = "";
                             }
@@ -159,7 +164,7 @@ public class TelegramBot extends TelegramLongPollingBot {
         } else if (update.hasCallbackQuery()) {
             String data = update.getCallbackQuery().getData();
             long chatId = update.getCallbackQuery().getMessage().getChatId();
-            User user = userService.getUser(chatId);
+            User user = userService.getUser(chatId).orElseThrow(() -> new UserNotFoundException(chatId));
             StationarySurveyStreet currentState = StationarySurveyStreet.valueOf(user.getCurrentState());
             switch (currentState) {
                 case START_SURVEY -> {
@@ -223,8 +228,8 @@ public class TelegramBot extends TelegramLongPollingBot {
                     log.info("HEALTH_CHOISE branch start");
                     try {
                         if (!data.equals("SKIP")) {
-                            Health health = healthRepository.findByHealthLabel(data);
-                            userService.addHealthTag(user, health);
+                            Optional<Health> health = healthRepository.findByHealthLabel(data);
+                            health.ifPresent(health1 -> userService.addHealthTag(user, health1));
                         }
                         BotButtons.mealsChoise(chatId, this);
                         userService.setCurrentState(user, StationarySurveyStreet.MEAL_CHOISE);
@@ -237,8 +242,8 @@ public class TelegramBot extends TelegramLongPollingBot {
                     log.info("MEAL_CHOISE branch start");
                     try {
                         if (!data.equals("SKIP")) {
-                            Meal meal = mealRepository.findByMealLabel(data);
-                            userService.addMealTag(user, meal);
+                            Optional<Meal> meal = mealRepository.findByMealLabel(data);
+                            meal.ifPresent(meal1 -> userService.addMealTag(user, meal1));
 
                         }
                         BotButtons.dishesChoise(chatId, this);
@@ -252,8 +257,8 @@ public class TelegramBot extends TelegramLongPollingBot {
                     log.info("DISHES_CHOISE branch start");
                     try {
                         if (!data.equals("SKIP")) {
-                            Dish dish = dishRepository.findByDishLabel(data);
-                            userService.addDishTag(user, dish);
+                            Optional<Dish> dish = dishRepository.findByDishLabel(data);
+                            dish.ifPresent(dish1 -> userService.addDishTag(user, dish1));
                         }
                         BotButtons.countryChoise(chatId, this);
                         userService.setCurrentState(user, StationarySurveyStreet.COUNTRY_CHOISE);
@@ -266,8 +271,8 @@ public class TelegramBot extends TelegramLongPollingBot {
                     log.info("COUNTRY_CHOISE branch enter");
                     try {
                         if (!data.equals("SKIP")) {
-                            Cuisine cuisine = cuisineRepository.findByCuisineLabel(data);
-                            userService.addCuisineTag(user, cuisine);
+                            Optional<Cuisine> cuisine = cuisineRepository.findByCuisineLabel(data);
+                            cuisine.ifPresent(cuisine1 -> userService.addCuisineTag(user, cuisine1));
                         }
                         TelegramChatUtils.sendMessage(this, chatId, "Введите ваши предпочтения в еде:");
                         userService.setCurrentState(user, StationarySurveyStreet.END_FOOD_CHOISE);

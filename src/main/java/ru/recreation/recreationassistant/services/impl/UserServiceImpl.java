@@ -2,9 +2,12 @@ package ru.recreation.recreationassistant.services.impl;
 
 import org.springframework.stereotype.Service;
 import ru.recreation.recreationassistant.entity.*;
+import ru.recreation.recreationassistant.exceptions.UserNotFoundException;
 import ru.recreation.recreationassistant.repositories.UserRepository;
 import ru.recreation.recreationassistant.services.UserService;
 import ru.recreation.recreationassistant.utils.StationarySurveyStreet;
+
+import java.util.Optional;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -16,13 +19,13 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void update(User user) {
-        userRepository.save(user);
+    public User update(User user) {
+        return userRepository.save(user);
     }
 
     @Override
-    public User getUser(Long telegramId) {
-        return userRepository.findByTelegramChatId(String.valueOf(telegramId)).get();
+    public Optional<User> getUser(Long telegramId) {
+        return userRepository.findByTelegramChatId(String.valueOf(telegramId));
     }
 
     @Override
@@ -68,10 +71,10 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void save(User user, String username, Long telegramId) {
+    public User save(User user, String username, Long telegramId) {
         user.setUsername(username);
         user.setTelegramChatId(String.valueOf(telegramId));
-        update(user);
+        return update(user);
     }
 
     @Override
