@@ -43,19 +43,19 @@ public class WeatherHelperServiceImpl implements WeatherHelperService {
         ObjectMapper mapper = new ObjectMapper();
         log.info("Parsing weather data from json ...");
         WeatherInCity weather = mapper.readValue(json.getBody(), WeatherInCity.class);
-        return weather.fact;
+        return weather.getFact();
     }
 
     private String getStringRecommendation(FactWeather weather) {
         log.info("WeatherHelper getStringRecommendation method start");
         StringBuilder result = new StringBuilder();
         log.info("Adding recommendations");
-        if (weather.feels_like > 17) {
-            result.append(Recommendation.WARM_INFO).append(Recommendation.TEMP_FEELS).append(weather.feels_like).append("°C. ");
+        if (weather.getFeelsLike() > 17) {
+            result.append(Recommendation.WARM_INFO).append(Recommendation.TEMP_FEELS).append(weather.getFeelsLike()).append("°C. ");
         } else {
-            result.append(Recommendation.COLD_WARNING).append(Recommendation.TEMP_FEELS).append(weather.feels_like).append(" °C. ");
+            result.append(Recommendation.COLD_WARNING).append(Recommendation.TEMP_FEELS).append(weather.getFeelsLike()).append(" °C. ");
         }
-        if (weather.condition.equals("rain")) {
+        if (weather.getCondition().equals("rain")) {
             result.append(Recommendation.RAIN_WARNING);
         }
         return result.toString();

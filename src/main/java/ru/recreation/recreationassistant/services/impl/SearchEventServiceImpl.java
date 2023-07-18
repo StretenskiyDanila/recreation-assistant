@@ -48,7 +48,7 @@ public class SearchEventServiceImpl implements SearchEventService {
             Exhibition exhibition;
             log.info("Creating exhibition from respone body");
             exhibition = mapper.readValue(response.getBody(), Exhibition.class);
-            return exhibition.results;
+            return exhibition.getEventList();
         } catch (JsonProcessingException e) {
             throw new RuntimeException();
         }
