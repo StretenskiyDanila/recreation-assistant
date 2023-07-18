@@ -2,6 +2,7 @@ package ru.recreation.recreationassistant.services.impl;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
@@ -27,6 +28,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 @Slf4j
 @PropertySource("config.properties")
 public class RecipeRecommendationsServiceImpl implements RecipeRecommendationsService {
@@ -43,11 +45,6 @@ public class RecipeRecommendationsServiceImpl implements RecipeRecommendationsSe
 
     @Value("${edamam.food_limit}")
     private int recipeLimit;
-
-    public RecipeRecommendationsServiceImpl(TranslationService translationService) {
-        this.translationService = translationService;
-    }
-
 
     @Override
     public List<Recipe> getRecipeRecommendations(User user, String userRequest) {
@@ -107,6 +104,4 @@ public class RecipeRecommendationsServiceImpl implements RecipeRecommendationsSe
             throw new RuntimeException();
         }
     }
-
-
 }

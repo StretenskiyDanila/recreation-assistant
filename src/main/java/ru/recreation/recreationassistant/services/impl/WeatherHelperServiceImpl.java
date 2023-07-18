@@ -17,6 +17,12 @@ import ru.recreation.recreationassistant.services.WeatherHelperService;
 @Slf4j
 public class WeatherHelperServiceImpl implements WeatherHelperService {
 
+    private static final String API_URL = "https://api.weather.yandex.ru/v2/forecast";
+    @Value("${weather_api_key}")
+    private String API_KEY;
+    @Value("${weather_api_key_name}")
+    private String API_KEY_NAME;
+
     public String getRecommendation(City city) throws JsonProcessingException {
         log.info("WeatherService getRecommendation start");
         HttpHeaders headers = new HttpHeaders();
@@ -54,10 +60,4 @@ public class WeatherHelperServiceImpl implements WeatherHelperService {
         }
         return result.toString();
     }
-    private static final String API_URL = "https://api.weather.yandex.ru/v2/forecast";
-    @Value("${weather_api_key}")
-    private String API_KEY;
-    @Value("${weather_api_key_name}")
-    private String API_KEY_NAME;
-
 }
