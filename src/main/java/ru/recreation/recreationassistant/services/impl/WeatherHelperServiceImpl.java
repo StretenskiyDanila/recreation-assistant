@@ -1,12 +1,11 @@
 package ru.recreation.recreationassistant.services.impl;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.util.MultiValueMap;
 import ru.recreation.recreationassistant.models.City;
 import ru.recreation.recreationassistant.models.FactWeather;
 import ru.recreation.recreationassistant.models.Recommendation;
@@ -17,27 +16,31 @@ import ru.recreation.recreationassistant.services.WeatherHelperService;
 @Slf4j
 public class WeatherHelperServiceImpl implements WeatherHelperService {
 
+    private static final String URL = "https://api.weather.yandex.ru/v2/forecast";
+    @Value("${weather_api_key}")
+    private String API_KEY;
+    @Value("${weather_api_key_name}")
+    private String API_KEY_NAME;
+
+    private final RestTemplateWork restTemplateWork;
+
+    public WeatherHelperServiceImpl(RestTemplateWork restTemplateWork) {
+        this.restTemplateWork = restTemplateWork;
+    }
+
     public String getRecommendation(City city) throws JsonProcessingException {
         log.info("WeatherService getRecommendation start");
+        MultiValueMap<String, String> map = restTemplateWork.getParams(city);
+
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
         log.info("Adding api_data from config.properties");
         headers.add(API_KEY_NAME, API_KEY);
-        HttpEntity<String> request = new HttpEntity<>(headers);
-        RestTemplate restTemplate = new RestTemplate();
-        log.info("Forming url from city params ...");
-        String sb = API_URL + "?lat=" + city.getLatitude() +
-                "&lon=" + city.getLongitude() +
-                "&extra=true";
-        return getStringRecommendation(getForecast(restTemplate.exchange(sb, HttpMethod.GET, request, String.class)));
-    }
-
-    private FactWeather getForecast(ResponseEntity<String> json) throws JsonProcessingException {
-        log.info("WeatherHelper getForecast method start");
-        ObjectMapper mapper = new ObjectMapper();
+        HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(headers);
+        ResponseEntity<String> response = restTemplateWork.getResponse(URL, map, request);
         log.info("Parsing weather data from json ...");
-        WeatherInCity weather = mapper.readValue(json.getBody(), WeatherInCity.class);
-        return weather.fact;
+        WeatherInCity weather = restTemplateWork.getJacksonResult(response, WeatherInCity.class);
+        return getStringRecommendation(weather.fact);
     }
 
     private String getStringRecommendation(FactWeather weather) {
@@ -54,10 +57,4 @@ public class WeatherHelperServiceImpl implements WeatherHelperService {
         }
         return result.toString();
     }
-    private static final String API_URL = "https://api.weather.yandex.ru/v2/forecast";
-    @Value("${weather_api_key}")
-    private String API_KEY;
-    @Value("${weather_api_key_name}")
-    private String API_KEY_NAME;
-
 }
