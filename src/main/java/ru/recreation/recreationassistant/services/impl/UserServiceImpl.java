@@ -1,5 +1,6 @@
 package ru.recreation.recreationassistant.services.impl;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.recreation.recreationassistant.entity.*;
 import ru.recreation.recreationassistant.repositories.UserRepository;
@@ -7,13 +8,10 @@ import ru.recreation.recreationassistant.services.UserService;
 import ru.recreation.recreationassistant.utils.StationarySurveyStreet;
 
 @Service
+@RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
-
-    public UserServiceImpl(UserRepository userRepository) {
-        this.userRepository = userRepository;
-    }
 
     @Override
     public void update(User user) {
