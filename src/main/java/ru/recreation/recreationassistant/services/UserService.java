@@ -3,11 +3,14 @@ package ru.recreation.recreationassistant.services;
 import ru.recreation.recreationassistant.entity.*;
 import ru.recreation.recreationassistant.utils.StationarySurveyStreet;
 
+import java.util.Optional;
+
 public interface UserService {
 
-    void update(User user);
 
-    User getUser(Long telegramId);
+    User update(User user);
+
+    Optional<User> getUser(Long telegramId);
 
     void setCity(User user, String city);
 
@@ -23,8 +26,7 @@ public interface UserService {
 
     void setUsername(User user, String username);
 
-    void save(User user, String username, Long telegramId);
+    User save(User user, String username, Long telegramId);
 
     void clearUserTags(User user);
-
 }
