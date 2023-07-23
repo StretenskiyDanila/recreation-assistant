@@ -1,5 +1,8 @@
 package ru.recreation.recreationassistant.utils;
 
+import lombok.Getter;
+
+@Getter
 public enum CityButtons implements ButtonInfo {
     BUTTON_MSK("Москва","msk"),
     BUTTON_SPB("Санкт-Петербург","spb"),
@@ -21,16 +24,6 @@ public enum CityButtons implements ButtonInfo {
 
     private final String buttonText;
     private final String buttonId;
-
-    @Override
-    public String getButtonText() {
-        return buttonText;
-    }
-
-    @Override
-    public String getButtonId() {
-        return buttonId;
-    }
 
     public static String getNameCityOnId(String cityId) {
         for (CityButtons cityButton : CityButtons.values()) {

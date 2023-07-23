@@ -1,5 +1,8 @@
 package ru.recreation.recreationassistant.utils;
 
+import lombok.Getter;
+
+@Getter
 public enum EventButtons implements ButtonInfo {
     BUTTON_CLUB("Клубы","clubs"),
     BUTTON_PARK("Парки","park"),
@@ -19,13 +22,4 @@ public enum EventButtons implements ButtonInfo {
     private final String buttonText;
     private final String buttonId;
 
-    @Override
-    public String getButtonText() {
-        return buttonText;
-    }
-
-    @Override
-    public String getButtonId() {
-        return buttonId;
-    }
 }

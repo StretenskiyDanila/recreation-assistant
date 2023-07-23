@@ -14,6 +14,7 @@ import ru.recreation.recreationassistant.services.RecipientCoordinatesCity;
 @PropertySource("config.properties")
 @Slf4j
 public class RecipientCoordinatesCityImpl implements RecipientCoordinatesCity {
+
     private static final String URL = "https://geocode-maps.yandex.ru/1.x/";
 
     private final RestTemplateWork restTemplateWork;
@@ -50,4 +51,5 @@ public class RecipientCoordinatesCityImpl implements RecipientCoordinatesCity {
         double lon = Double.parseDouble(coords[1]);
         return new City(lat, lon);
     }
+
 }

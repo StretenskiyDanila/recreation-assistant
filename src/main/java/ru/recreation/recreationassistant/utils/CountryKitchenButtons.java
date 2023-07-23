@@ -1,5 +1,8 @@
 package ru.recreation.recreationassistant.utils;
 
+import lombok.Getter;
+
+@Getter
 public enum CountryKitchenButtons implements ButtonInfo {
     BUTTON_USA("Американская", "american"),
     BUTTON_CHN("Китайская", "chinese"),
@@ -18,13 +21,4 @@ public enum CountryKitchenButtons implements ButtonInfo {
     private final String buttonText;
     private final String buttonId;
 
-    @Override
-    public String getButtonText() {
-        return buttonText;
-    }
-
-    @Override
-    public String getButtonId() {
-        return buttonId;
-    }
 }

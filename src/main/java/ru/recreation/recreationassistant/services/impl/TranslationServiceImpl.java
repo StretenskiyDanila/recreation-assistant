@@ -38,4 +38,5 @@ public class TranslationServiceImpl implements TranslationService {
         JsonArray jsonObject = restTemplateWork.getGsonResult(response, JsonArray.class);
         return jsonObject.get(0).getAsJsonArray().get(0).getAsJsonArray().get(0).getAsString();
     }
+
 }

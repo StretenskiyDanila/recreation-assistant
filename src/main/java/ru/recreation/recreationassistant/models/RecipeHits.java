@@ -1,15 +1,14 @@
 package ru.recreation.recreationassistant.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import lombok.Getter;
 
 import java.util.List;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
+@Getter
 public class RecipeHits {
 
-    public int from;
-    public int to;
-    public int count;
-    public List<RecipeRecommendation> hits;
+    private List<RecipeRecommendation> hits;
 
 }

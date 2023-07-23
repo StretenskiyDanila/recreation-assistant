@@ -15,6 +15,7 @@ import java.util.List;
 @Service
 @Slf4j
 public class SearchEventServiceImpl implements SearchEventService {
+
     private static final String URL = "https://kudago.com/public-api/v1.4/places/";
 
     private final RestTemplateWork restTemplateWork;
@@ -35,9 +36,10 @@ public class SearchEventServiceImpl implements SearchEventService {
             ResponseEntity<String> response = restTemplateWork.getResponse(URL, map, request);
             log.info("Creating exhibition from respone body");
             Exhibition exhibition = restTemplateWork.getJacksonResult(response, Exhibition.class);
-            return exhibition.results;
+            return exhibition.getEventList();
         } catch (JsonProcessingException e) {
             throw new RuntimeException();
         }
     }
+
 }
