@@ -139,14 +139,14 @@ public class TelegramBot extends TelegramLongPollingBot {
                                 TelegramChatUtils.sendMessage(this, chatId, "К сожалению, мы ничего не нашли :(");
                             }
                             for (Recipe recipe : recipeRecommendations) {
-                                recommendation.append("Название блюда: ").append(translationService.translate(recipe.label)).append('\n');
+                                recommendation.append("Название блюда: ").append(translationService.translate(recipe.getLabel())).append('\n');
                                 recommendation.append("Необходимые ингридиенты: \n");
                                 StringBuilder finalRecommendation = recommendation;
-                                recipe.ingredientLines.forEach(s -> finalRecommendation.append(translationService.translate(s)).append('\n'));
-                                recommendation.append("Примерное время приготовления: ").append(recipe.totalTime).append(" минут\n");
-                                recommendation.append("Калорийность блюда: ").append(decimalFormat.format(Double.parseDouble(recipe.calories))).append("\n");
-                                recommendation.append("Кухня: ").append(translationService.translate(recipe.cuisineType.stream().findFirst().orElse("Не определено"))).append("\n");
-                                recommendation.append("Узнать подробнее о рецепте: ").append(recipe.url);
+                                recipe.getIngredientLines().forEach(s -> finalRecommendation.append(translationService.translate(s)).append('\n'));
+                                recommendation.append("Примерное время приготовления: ").append(recipe.getTotalTime()).append(" минут\n");
+                                recommendation.append("Калорийность блюда: ").append(decimalFormat.format(Double.parseDouble(recipe.getCalories()))).append("\n");
+                                recommendation.append("Кухня: ").append(translationService.translate(recipe.getCuisineType().stream().findFirst().orElse("Не определено"))).append("\n");
+                                recommendation.append("Узнать подробнее о рецепте: ").append(recipe.getUrl());
                                 TelegramChatUtils.sendMessage(this, chatId, recommendation.toString());
                                 recommendation = new StringBuilder("\n");
                                 userService.clearUserTags(user);
@@ -212,9 +212,9 @@ public class TelegramBot extends TelegramLongPollingBot {
                         StringBuilder message = new StringBuilder("В вашем городе мы рекомендуем посетить:\n");
                         int i = 1;
                         for (Event event : events) {
-                            message.append(i++).append(". Название: ").append(event.title).append("\n");
-                            message.append("   Находится по адресу: ").append(event.address).append("\n");
-                            message.append("   Подробно можно узнать на сайте: ").append(event.site_url).append("\n");
+                            message.append(i++).append(". Название: ").append(event.getTitle()).append("\n");
+                            message.append("   Находится по адресу: ").append(event.getAddress()).append("\n");
+                            message.append("   Подробно можно узнать на сайте: ").append(event.getSiteUrl()).append("\n");
                             TelegramChatUtils.sendMessage(this, chatId, message.toString());
                             message = new StringBuilder();
                         }

@@ -1,5 +1,8 @@
 package ru.recreation.recreationassistant.utils;
 
+import lombok.Getter;
+
+@Getter
 public enum StartButtons implements ButtonInfo {
     BUTTON_HOME("Сидеть дома", "HOME"),
     BUTTON_STREET("Идти гулять", "STREET");
@@ -12,13 +15,4 @@ public enum StartButtons implements ButtonInfo {
     private final String buttonText;
     private final String buttonId;
 
-    @Override
-    public String getButtonText() {
-        return buttonText;
-    }
-
-    @Override
-    public String getButtonId() {
-        return buttonId;
-    }
 }

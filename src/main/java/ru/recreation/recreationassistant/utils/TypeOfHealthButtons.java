@@ -1,10 +1,12 @@
 package ru.recreation.recreationassistant.utils;
 
+import lombok.Getter;
+
+@Getter
 public enum TypeOfHealthButtons implements ButtonInfo {
 
     BUTTON_FREE_ALCOHOL("Без алкоголя", "alcohol-free"),
     BUTTON_VEGETARIAN("Вегетарианская пища", "vegetarian"),
-
     BUTTON_SKIP("Пропустить", "SKIP");
 
 
@@ -16,13 +18,4 @@ public enum TypeOfHealthButtons implements ButtonInfo {
     private final String buttonText;
     private final String buttonId;
 
-    @Override
-    public String getButtonText() {
-        return buttonText;
-    }
-
-    @Override
-    public String getButtonId() {
-        return buttonId;
-    }
 }

@@ -1,5 +1,8 @@
 package ru.recreation.recreationassistant.utils;
 
+import lombok.Getter;
+
+@Getter
 public enum TypeOfDishesButtons implements ButtonInfo {
     BUTTON_COCKTAIL("Напитки", "drinks"),
     BUTTON_DESSERTS("Десерт", "desserts"),
@@ -20,14 +23,4 @@ public enum TypeOfDishesButtons implements ButtonInfo {
     private final String buttonText;
     private final String buttonId;
 
-
-    @Override
-    public String getButtonText() {
-        return buttonText;
-    }
-
-    @Override
-    public String getButtonId() {
-        return buttonId;
-    }
 }

@@ -10,6 +10,7 @@ import org.springframework.util.MultiValueMap;
 import ru.recreation.recreationassistant.entity.*;
 import ru.recreation.recreationassistant.models.Recipe;
 import ru.recreation.recreationassistant.models.RecipeHits;
+import ru.recreation.recreationassistant.models.RecipeRecommendation;
 import ru.recreation.recreationassistant.services.RecipeRecommendationsService;
 import ru.recreation.recreationassistant.services.TranslationService;
 import ru.recreation.recreationassistant.utils.ListUtils;
@@ -54,8 +55,8 @@ public class RecipeRecommendationsServiceImpl implements RecipeRecommendationsSe
             ResponseEntity<String> response = restTemplateWork.getResponse(URL, map, request);
             RecipeHits hits = restTemplateWork.getJacksonResult(response, RecipeHits.class);
             if (hits != null) {
-                return ListUtils.pickNRandom(hits.hits, recipeLimit).stream()
-                        .map(recipeRecommendation -> recipeRecommendation.recipe).collect(Collectors.toList());
+                return ListUtils.pickNRandom(hits.getHits(), recipeLimit).stream()
+                        .map(RecipeRecommendation::getRecipe).collect(Collectors.toList());
             }
             return new ArrayList<>();
         } catch (JsonProcessingException e) {
@@ -63,4 +64,5 @@ public class RecipeRecommendationsServiceImpl implements RecipeRecommendationsSe
             throw new RuntimeException();
         }
     }
+
 }
