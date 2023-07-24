@@ -52,7 +52,7 @@ public class WeatherHelperServiceImpl implements WeatherHelperService {
         StringBuilder result = new StringBuilder();
         log.info("Adding recommendations");
         String jsonPath = "src/main/resources/Recommendation.json";
-        try(FileReader reader = new FileReader(jsonPath)) {
+        try (FileReader reader = new FileReader(jsonPath)) {
             JsonObject jsonObject = JsonParser.parseReader(reader).getAsJsonObject();
             if (weather.getFeelsLike() > 17) {
                 result.append(jsonObject.get("WARM_INFO").getAsString()).append(jsonObject.get("TEMP_FEELS").getAsString()).append(weather.getFeelsLike()).append("°C. ");
@@ -62,7 +62,7 @@ public class WeatherHelperServiceImpl implements WeatherHelperService {
             if (weather.getCondition().equals("rain")) {
                 result.append(jsonObject.get("RAIN_WARNING").getAsString());
             }
-        }catch (IOException e){
+        } catch (IOException e) {
             log.error("Error during find json");
         }
         return result.toString();
